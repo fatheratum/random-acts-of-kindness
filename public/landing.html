@@ -3,596 +3,605 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Random Acts of Kindness — Particle LC</title>
+<title>Random Acts of Kindness</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Inter:wght@200;300;400&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:#0a0308;color:#fdf3ec;font-family:'Inter',sans-serif;overflow-x:hidden}
+html,body{background:#030106;overflow-x:hidden;filter:contrast(1.06) saturate(1.18)}
 #c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
-#scroll-root{position:relative;z-index:1;height:900vh}
-
-/* Persistent overlay */
-#crown{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
-#crown-title{font-family:'Inter',sans-serif;font-size:clamp(9px,1.8vw,12px);letter-spacing:.35em;text-transform:uppercase;color:rgba(253,243,236,.75);font-weight:300}
-#crown-copy{font-size:10px;letter-spacing:.25em;color:rgba(253,243,236,.4);font-weight:300}
-#asterisk{position:fixed;bottom:28px;right:28px;z-index:100;font-size:26px;color:#ffd166;animation:astSpin 8s linear infinite,astPulse 2s ease-in-out infinite;pointer-events:none;text-shadow:0 0 20px rgba(255,209,102,.8),0 0 60px rgba(255,209,102,.4)}
+#grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;mix-blend-mode:overlay}
+#grade{position:fixed;inset:0;z-index:2;pointer-events:none;background:linear-gradient(155deg,rgba(0,50,80,.11) 0%,transparent 45%,rgba(90,35,0,.08) 100%);mix-blend-mode:color}
+#vignette{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 55%,rgba(2,0,4,.75) 100%)}
+#flares{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.fl{position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen;transform:translate(-50%,-50%);transition:opacity .8s}
+#scroll-root{position:relative;z-index:4;height:1050vh}
+/* crown */
+#crown{position:fixed;top:0;left:0;right:0;z-index:200;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;background:linear-gradient(to bottom,rgba(3,1,6,.7),transparent)}
+#rak-text{font-size:clamp(9px,1.4vw,12px);letter-spacing:.42em;text-transform:uppercase;color:rgba(253,243,236,.82);font-weight:200;font-family:'Inter',sans-serif;text-shadow:0 0 30px rgba(255,209,102,.35)}
+#copy-text{font-size:8px;letter-spacing:.18em;color:rgba(253,243,236,.12);font-weight:200;font-family:'Inter',sans-serif}
+#asterisk{position:fixed;bottom:24px;right:26px;z-index:200;font-size:22px;color:#ffd166;pointer-events:none;
+  animation:astSpin 12s linear infinite,astPulse 3s ease-in-out infinite;
+  text-shadow:0 0 12px rgba(255,209,102,1),0 0 40px rgba(255,209,102,.7),0 0 80px rgba(255,209,102,.4),0 0 160px rgba(255,209,102,.2)}
 @keyframes astSpin{to{transform:rotate(360deg)}}
-@keyframes astPulse{0%,100%{opacity:.7;filter:blur(0)}50%{opacity:1;filter:blur(.5px) brightness(1.4)}}
-
-/* Text sections */
-.section{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;pointer-events:none;opacity:0}
-.eyebrow{font-size:10px;letter-spacing:.45em;text-transform:uppercase;color:#ffd166;margin-bottom:18px;font-weight:400}
-.headline{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,9vw,96px);line-height:1.02;font-weight:300;color:#fdf3ec}
-.headline em{font-style:italic;background:linear-gradient(135deg,#ff8fa3,#ffd166,#ff8fa3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:shimShift 4s ease-in-out infinite}
-.sub{font-size:clamp(13px,2.2vw,18px);color:rgba(253,243,236,.6);margin-top:22px;font-weight:300;max-width:520px;line-height:1.7;letter-spacing:.02em}
-.data-row{display:flex;gap:48px;margin-top:40px;justify-content:center;flex-wrap:wrap}
-.data-item{text-align:center}
-.data-num{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,6vw,56px);font-weight:600;color:#ffd166;line-height:1}
-.data-label{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(253,243,236,.5);margin-top:6px}
-@keyframes shimShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-
-/* Hero CTA */
-#hero-cta{position:absolute;top:0;left:0;right:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center;padding:0 24px}
-#hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,11vw,120px);font-weight:300;line-height:.95;letter-spacing:-.02em;color:#fdf3ec}
-#hero-title span{display:block;font-style:italic;background:linear-gradient(120deg,#ff8fa3 0%,#ffd166 50%,#ff5d73 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:300% 300%;animation:shimShift 5s ease-in-out infinite}
-#hero-sub{font-size:clamp(12px,2vw,16px);letter-spacing:.2em;text-transform:uppercase;color:rgba(253,243,236,.5);margin-top:28px;font-weight:300}
-#hero-btn{margin-top:48px;padding:16px 44px;border:1px solid rgba(255,209,102,.5);border-radius:999px;font-size:13px;letter-spacing:.25em;text-transform:uppercase;color:#ffd166;text-decoration:none;background:rgba(255,209,102,.06);backdrop-filter:blur(8px);transition:all .4s;pointer-events:all;display:inline-block}
-#hero-btn:hover{background:rgba(255,209,102,.15);border-color:rgba(255,209,102,.9);box-shadow:0 0 40px rgba(255,209,102,.3)}
-#scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:.5;animation:bounce 2.4s ease-in-out infinite}
-#scroll-hint span{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#fdf3ec}
-#scroll-hint::after{content:'';width:1px;height:48px;background:linear-gradient(to bottom,rgba(253,243,236,.6),transparent)}
-@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
-
-/* Section positions */
-#s1{top:115vh;height:60vh}
-#s2{top:210vh;height:60vh}
-#s3{top:310vh;height:60vh}
-#s4{top:415vh;height:60vh}
-#s5{top:520vh;height:60vh}
-#s6{top:620vh;height:60vh}
-#s7{top:730vh;height:80vh}
-
-/* Veil effect */
-.veil{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(255,143,163,.06),transparent);pointer-events:none}
-
-/* Holographic data card */
-.holo-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,209,102,.2);border-radius:24px;padding:32px 40px;backdrop-filter:blur(20px);margin-top:36px;max-width:460px;text-align:left}
-.holo-card h4{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#ffd166;margin-bottom:16px}
-.holo-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.holo-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;animation:dotPulse 2s ease-in-out infinite}
-@keyframes dotPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.6)}}
-.holo-text{font-size:12px;color:rgba(253,243,236,.7);letter-spacing:.05em}
-
-/* Final */
-#s7 .headline{font-size:clamp(60px,13vw,160px)}
-
-@media(max-width:600px){
-  .data-row{gap:28px}
-  #hero-btn{padding:14px 32px;font-size:11px}
-  .holo-card{padding:24px}
-}
+@keyframes astPulse{0%,100%{filter:brightness(1) blur(0)}50%{filter:brightness(2.2) blur(.5px)}}
+/* sections */
+.sec{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 32px;pointer-events:none;opacity:0}
+.eye{font-size:10px;letter-spacing:.52em;text-transform:uppercase;color:#ffd166;margin-bottom:18px;font-weight:300;font-family:'Inter',sans-serif}
+.hl{font-family:'Cormorant Garamond',serif;font-size:clamp(44px,9vw,98px);line-height:1.01;font-weight:300;color:#fdf3ec;text-shadow:0 2px 60px rgba(255,143,163,.18)}
+.hl em{font-style:italic;background:linear-gradient(135deg,#ff8fa3,#ffd166 48%,#ffb26b 72%,#ff5d73);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:shim 4.5s ease-in-out infinite}
+.sub{font-size:clamp(14px,2.1vw,19px);color:rgba(253,243,236,.55);margin-top:22px;font-weight:300;max-width:560px;line-height:1.8;letter-spacing:.025em;font-family:'Inter',sans-serif}
+.drow{display:flex;gap:52px;margin-top:44px;justify-content:center;flex-wrap:wrap}
+.dnum{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,6.5vw,58px);font-weight:600;color:#ffd166;line-height:1;text-shadow:0 0 40px rgba(255,209,102,.6)}
+.dlbl{font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(253,243,236,.42);margin-top:6px;font-family:'Inter',sans-serif}
+@keyframes shim{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+/* hero */
+#hero{position:absolute;top:0;left:0;right:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:4;text-align:center;padding:0 32px}
+#ht{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,11.5vw,130px);font-weight:300;line-height:.92;letter-spacing:-.025em;color:#fdf3ec;text-shadow:0 4px 80px rgba(255,143,163,.1)}
+#ht span{display:block;font-style:italic;background:linear-gradient(120deg,#ff8fa3,#ffd166 48%,#ffb26b 72%,#ff5d73);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:300% 300%;animation:shim 6s ease-in-out infinite}
+#hs{font-size:clamp(10px,1.7vw,14px);letter-spacing:.3em;text-transform:uppercase;color:rgba(253,243,236,.4);margin-top:30px;font-weight:200;font-family:'Inter',sans-serif}
+.btn{padding:16px 46px;border:1px solid rgba(255,209,102,.4);border-radius:999px;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:#ffd166;text-decoration:none;background:rgba(255,209,102,.04);backdrop-filter:blur(16px);transition:all .5s;pointer-events:all;display:inline-block;margin-top:52px;font-family:'Inter',sans-serif;font-weight:300}
+.btn:hover{background:rgba(255,209,102,.1);border-color:rgba(255,209,102,.95);box-shadow:0 0 80px rgba(255,209,102,.25),0 0 160px rgba(255,209,102,.1)}
+#sh{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:9px;opacity:.35;animation:sb 2.8s ease-in-out infinite}
+#sh span{font-size:8px;letter-spacing:.45em;text-transform:uppercase;color:#fdf3ec;font-family:'Inter',sans-serif}
+#sh::after{content:'';width:1px;height:48px;background:linear-gradient(to bottom,rgba(253,243,236,.5),transparent)}
+@keyframes sb{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(12px)}}
+/* holo card */
+.hcard{background:rgba(255,255,255,.025);border:1px solid rgba(255,209,102,.15);border-radius:24px;padding:30px 40px;backdrop-filter:blur(28px);margin-top:34px;max-width:460px;text-align:left;box-shadow:0 0 100px rgba(255,143,163,.04),inset 0 1px 0 rgba(255,255,255,.05)}
+.hcard h4{font-size:9px;letter-spacing:.4em;text-transform:uppercase;color:#ffd166;margin-bottom:16px;font-family:'Inter',sans-serif;font-weight:300}
+.hrow{display:flex;align-items:center;gap:14px;margin-bottom:11px}
+.hdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;animation:dp 2.4s ease-in-out infinite}
+@keyframes dp{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(2);filter:brightness(1.8)}}
+.htx{font-size:12px;color:rgba(253,243,236,.6);letter-spacing:.04em;font-family:'Inter',sans-serif;font-weight:300}
+/* section heights */
+#s1{top:120vh;height:65vh}#s2{top:220vh;height:65vh}#s3{top:320vh;height:65vh}
+#s4{top:430vh;height:65vh}#s5{top:540vh;height:65vh}#s6{top:650vh;height:65vh}
+#s7{top:760vh;height:65vh}#s8{top:880vh;height:80vh}
+#s8 .hl{font-size:clamp(62px,14vw,170px)}
 </style>
 </head>
 <body>
-
 <canvas id="c"></canvas>
-
-<!-- Persistent overlay -->
-<div id="crown">
-  <div id="crown-title">Random Acts of Kindness</div>
-  <div id="crown-copy">© Particle LC</div>
+<canvas id="grain"></canvas>
+<div id="grade"></div>
+<div id="vignette"></div>
+<div id="flares">
+  <div class="fl" id="fa" style="width:220px;height:220px;background:radial-gradient(circle,rgba(255,209,102,.16) 0%,rgba(255,209,102,.05) 40%,transparent 70%)"></div>
+  <div class="fl" id="fb" style="width:140px;height:140px;background:radial-gradient(circle,rgba(255,143,163,.22) 0%,transparent 70%)"></div>
+  <div class="fl" id="fc" style="width:100px;height:100px;background:radial-gradient(circle,rgba(197,139,255,.2) 0%,transparent 70%)"></div>
+  <div class="fl" id="fd" style="width:60px;height:60px;background:radial-gradient(circle,rgba(124,196,255,.3) 0%,transparent 70%)"></div>
 </div>
-<div id="asterisk">✦</div>
-
-<!-- Hero (always visible) -->
-<div id="hero-cta">
-  <div class="veil"></div>
-  <div id="hero-title">
-    Random Acts<br/><span>of Kindness</span>
-  </div>
-  <div id="hero-sub">Every little good thing counts</div>
-  <a id="hero-btn" href="http://localhost:5173">Open the App ↗</a>
-  <div id="scroll-hint"><span>Scroll</span></div>
+<div id="crown"><div id="rak-text">Random Acts of Kindness</div><div id="copy-text">&copy; Particle LC</div></div>
+<div id="asterisk">&#10022;</div>
+<div id="hero">
+  <div id="ht">Random Acts<br/><span>of Kindness</span></div>
+  <div id="hs">Every little good thing counts</div>
+  <a class="btn" href="/login">Open the App &#8599;</a>
+  <div id="sh"><span>Scroll</span></div>
 </div>
-
-<!-- Scroll sections -->
 <div id="scroll-root">
-
-  <div class="section" id="s1">
-    <div class="eyebrow">Connection Quality</div>
-    <h2 class="headline">Love Without<br/><em>Boundaries</em></h2>
-    <p class="sub">Every act logged becomes a living signal — rippling outward, touching lives, growing the kindness network one honest gesture at a time.</p>
-    <div class="data-row">
-      <div class="data-item"><div class="data-num" id="cnt1">0</div><div class="data-label">Acts Possible</div></div>
-      <div class="data-item"><div class="data-num" id="cnt2">0</div><div class="data-label">Kindness Types</div></div>
-      <div class="data-item"><div class="data-num" id="cnt3">0</div><div class="data-label">Badges to Earn</div></div>
-    </div>
-  </div>
-
-  <div class="section" id="s2">
-    <div class="eyebrow">Crafted for Pure Kindness</div>
-    <h2 class="headline"><em>Unrivalled</em><br/>Connection</h2>
-    <p class="sub">Streak flames. Golden coins. 3D trophies that spin when you earn them. The most beautiful kindness tracker ever built.</p>
-  </div>
-
-  <div class="section" id="s3">
-    <div class="eyebrow">Real-Time World View</div>
-    <h2 class="headline">Global<br/><em>Kindness Map</em></h2>
-    <p class="sub">Drag the 3D globe and watch your acts become glowing pins across the world. Every location tagged, every good deed placed on the living Earth.</p>
-    <div class="holo-card">
-      <h4>Live Kindness Intelligence</h4>
-      <div class="holo-row"><div class="holo-dot" style="background:#7be3b1;animation-delay:0s"></div><div class="holo-text">Global kindness waves — real-time geo feed</div></div>
-      <div class="holo-row"><div class="holo-dot" style="background:#ffd166;animation-delay:.4s"></div><div class="holo-text">Neural empathy map — streak connections</div></div>
-      <div class="holo-row"><div class="holo-dot" style="background:#ff8fa3;animation-delay:.8s"></div><div class="holo-text">Daily auroras — your momentum made visible</div></div>
-      <div class="holo-row"><div class="holo-dot" style="background:#c58bff;animation-delay:1.2s"></div><div class="holo-text">Relationship galaxies — community bonds</div></div>
-    </div>
-  </div>
-
-  <div class="section" id="s4">
-    <div class="eyebrow">Intuitive Acts of Care</div>
-    <h2 class="headline">Log It<br/><em>Feel It</em></h2>
-    <p class="sub">One tap. A description. A feeling. A place. Your kindness is recorded, earned, and celebrated — with 3D badge trophies, streak flames, and bonus points.</p>
-  </div>
-
-  <div class="section" id="s5">
-    <div class="eyebrow">Community</div>
-    <h2 class="headline"><em>Kindness+</em><br/>Unlocked</h2>
-    <p class="sub">Hearts. Comments. Photo proof. The full social feed — live kindness from everyone, everywhere. Powered by real human goodness. Cash App simple.</p>
-    <div class="data-row">
-      <div class="data-item"><div class="data-num">$4.99</div><div class="data-label">Per Month</div></div>
-      <div class="data-item"><div class="data-num">8hr</div><div class="data-label">Max Activation</div></div>
-    </div>
-  </div>
-
-  <div class="section" id="s6">
-    <div class="eyebrow">Challenges</div>
-    <h2 class="headline">Kind 7.<br/><em>Century.</em></h2>
-    <p class="sub">Join challenges. Build a 30-day streak. Earn the legendary badge. Every day you show up, the flame grows brighter and the bonus points stack higher.</p>
-  </div>
-
-  <div class="section" id="s7">
-    <div class="eyebrow">Licensed to Particle LC</div>
-    <h2 class="headline"><em>Begin</em></h2>
-    <p class="sub">The world's most beautiful kindness tracker. Built with love. Powered by Three.js, React, and the quiet belief that one small act changes everything.</p>
-    <a id="hero-btn" href="http://localhost:5173" style="pointer-events:all;margin-top:48px;display:inline-block;padding:18px 52px;font-size:14px">Open the App ↗</a>
-  </div>
-
+  <div class="sec" id="s1"><div class="eye">Connection Quality</div><h2 class="hl">Love Without<br/><em>Boundaries</em></h2><p class="sub">Every act logged becomes a living signal rippling outward, touching lives across the global kindness network.</p><div class="drow"><div><div class="dnum" id="c1">0</div><div class="dlbl">Acts Possible</div></div><div><div class="dnum" id="c2">0</div><div class="dlbl">Kindness Types</div></div><div><div class="dnum" id="c3">0</div><div class="dlbl">Badges to Earn</div></div></div></div>
+  <div class="sec" id="s2"><div class="eye">Crafted for Pure Kindness</div><h2 class="hl"><em>Unrivalled</em><br/>Connection</h2><p class="sub">Streak flames. Golden coins. 3D trophies that spin when you earn them. The most beautiful kindness tracker ever built.</p></div>
+  <div class="sec" id="s3"><div class="eye">Real-Time World View</div><h2 class="hl">Global<br/><em>Kindness Map</em></h2><p class="sub">Drag the 3D globe and watch your acts become glowing pins across the world. Every location tagged, every good deed placed.</p><div class="hcard"><h4>Live Kindness Intelligence</h4><div class="hrow"><div class="hdot" style="background:#7be3b1;animation-delay:0s"></div><div class="htx">Global kindness waves &#8212; real-time geo feed</div></div><div class="hrow"><div class="hdot" style="background:#ffd166;animation-delay:.5s"></div><div class="htx">Neural empathy map &#8212; streak connections</div></div><div class="hrow"><div class="hdot" style="background:#ff8fa3;animation-delay:1s"></div><div class="htx">Daily auroras &#8212; your momentum made visible</div></div><div class="hrow"><div class="hdot" style="background:#c58bff;animation-delay:1.5s"></div><div class="htx">Relationship galaxies &#8212; community bonds</div></div></div></div>
+  <div class="sec" id="s4"><div class="eye">Intuitive Acts of Care</div><h2 class="hl">Log It<br/><em>Feel It</em></h2><p class="sub">One tap. A description. A feeling. A place. Your kindness is recorded, earned, and celebrated with 3D badge trophies.</p></div>
+  <div class="sec" id="s5"><div class="eye">Community</div><h2 class="hl"><em>Kindness+</em><br/>Unlocked</h2><p class="sub">Hearts. Comments. Photo proof. The full social feed live from everyone everywhere. Cash App simple.</p><div class="drow"><div><div class="dnum">$4.99</div><div class="dlbl">Per Month</div></div><div><div class="dnum">8hr</div><div class="dlbl">Max Activation</div></div></div></div>
+  <div class="sec" id="s6"><div class="eye">Challenges</div><h2 class="hl">Kind 7.<br/><em>Century.</em></h2><p class="sub">Join challenges. Build a 30-day streak. Earn the legendary badge. Every day you show up the constellation expands.</p></div>
+  <div class="sec" id="s7"><div class="eye">DNA of Kindness</div><h2 class="hl"><em>Woven</em><br/>in Light</h2><p class="sub">Every strand of energy connecting two people performing acts of kindness becomes a permanent bond in the network.</p></div>
+  <div class="sec" id="s8"><div class="eye">Licensed to Particle LC</div><h2 class="hl"><em>Begin</em></h2><p class="sub">The world's most beautiful kindness tracker. Built with love. One small act changes everything.</p><a class="btn" href="/login" style="pointer-events:all">Open the App &#8599;</a></div>
 </div>
 
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
-// ─── Three.js Scene ───────────────────────────────────
-const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-renderer.setSize(innerWidth, innerHeight);
-renderer.setClearColor(0x000000, 0);
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 300);
-camera.position.set(0, 0, 18);
-
-// Lighting
-scene.add(new THREE.AmbientLight(0xfff1e6, 0.6));
-const sun = new THREE.DirectionalLight(0xffffff, 1.0);
-sun.position.set(5, 8, 10);
-scene.add(sun);
-const rimL = new THREE.PointLight(0xff8fa3, 2, 40);
-rimL.position.set(-8, -4, 6);
-scene.add(rimL);
-const goldL = new THREE.PointLight(0xffd166, 1.8, 35);
-goldL.position.set(8, 6, 4);
-scene.add(goldL);
-
-// ─── Heart geometry ───────────────────────────────────
-function makeHeartShape() {
-  const s = new THREE.Shape();
-  s.moveTo(0.25,0.25);
-  s.bezierCurveTo(0.25,0.25,0.2,0,0,0);
-  s.bezierCurveTo(-0.3,0,-0.3,0.35,-0.3,0.35);
-  s.bezierCurveTo(-0.3,0.55,-0.1,0.77,0.25,0.95);
-  s.bezierCurveTo(0.6,0.77,0.8,0.55,0.8,0.35);
-  s.bezierCurveTo(0.8,0.35,0.8,0,0.5,0);
-  s.bezierCurveTo(0.35,0,0.25,0.25,0.25,0.25);
-  return s;
+// ── HELPERS ───────────────────────────────────────────────
+function circleTex(r,g,b,res){
+  res=res||128;var c=document.createElement('canvas');c.width=c.height=res;
+  var ctx=c.getContext('2d'),h=res/2;
+  var gr=ctx.createRadialGradient(h,h,0,h,h,h);
+  gr.addColorStop(0,'rgba('+r+','+g+','+b+',1)');
+  gr.addColorStop(.35,'rgba('+r+','+g+','+b+',.82)');
+  gr.addColorStop(.7,'rgba('+r+','+g+','+b+',.18)');
+  gr.addColorStop(1,'rgba('+r+','+g+','+b+',0)');
+  ctx.fillStyle=gr;ctx.fillRect(0,0,res,res);
+  return new THREE.CanvasTexture(c);
 }
-const heartGeo = new THREE.ExtrudeGeometry(makeHeartShape(), {depth:.28,bevelEnabled:true,bevelThickness:.06,bevelSize:.06,bevelSegments:4,curveSegments:20});
-heartGeo.center();
+function glowSp(r,g,b,size,res){
+  res=res||256;var c=document.createElement('canvas');c.width=c.height=res;
+  var ctx=c.getContext('2d'),h=res/2;
+  var gr=ctx.createRadialGradient(h,h,0,h,h,h);
+  gr.addColorStop(0,'rgba('+r+','+g+','+b+',.92)');
+  gr.addColorStop(.28,'rgba('+r+','+g+','+b+',.55)');
+  gr.addColorStop(.6,'rgba('+r+','+g+','+b+',.12)');
+  gr.addColorStop(1,'rgba('+r+','+g+','+b+',0)');
+  ctx.fillStyle=gr;ctx.fillRect(0,0,res,res);
+  var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
+  sp.scale.setScalar(size);return sp;
+}
+function ll(lat,lon,R){
+  var phi=(90-lat)*Math.PI/180,theta=(lon+180)*Math.PI/180;
+  return new THREE.Vector3(-R*Math.sin(phi)*Math.cos(theta),R*Math.cos(phi),R*Math.sin(phi)*Math.sin(theta));
+}
 
-// ─── Star shape ───────────────────────────────────────
-function makeStarShape(pts=5,r1=1,r2=.42){
-  const s = new THREE.Shape();
-  for(let i=0;i<pts*2;i++){
-    const r = i%2===0?r1:r2;
-    const a = (i/(pts*2))*Math.PI*2 - Math.PI/2;
-    i===0?s.moveTo(Math.cos(a)*r,Math.sin(a)*r):s.lineTo(Math.cos(a)*r,Math.sin(a)*r);
-  }
+// ── RENDERER / SCENE ──────────────────────────────────────
+var cv=document.getElementById('c');
+var renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2.5));
+renderer.setSize(innerWidth,innerHeight);
+renderer.setClearColor(0,0);
+var scene=new THREE.Scene();
+var camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.05,400);
+camera.position.set(0,0,20);
+
+// Lights
+scene.add(new THREE.AmbientLight(0xfff1e6,.45));
+var sun=new THREE.DirectionalLight(0xfff8f0,1.2);sun.position.set(8,12,14);scene.add(sun);
+var rL=new THREE.PointLight(0xff8fa3,2.8,55);rL.position.set(-12,-6,10);scene.add(rL);
+var gL=new THREE.PointLight(0xffd166,2.4,48);gL.position.set(11,8,6);scene.add(gL);
+var bL=new THREE.PointLight(0x4488ff,1.4,40);bL.position.set(-6,10,-5);scene.add(bL);
+var pL=new THREE.PointLight(0xcc44ff,1.0,32);pL.position.set(6,-8,-4);scene.add(pL);
+
+// ── SHADERS ───────────────────────────────────────────────
+// Caustic shader material
+var causticMat=new THREE.ShaderMaterial({
+  uniforms:{time:{value:0}},
+  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+  fragmentShader:
+    'uniform float time;varying vec2 vUv;'+
+    'void main(){'+
+    'vec2 p=vUv*2.0-1.0;float t=time;'+
+    'float c=sin(p.x*14.0+sin(p.y*11.0+t*1.1)+t*.4);'+
+    'c+=sin(p.y*16.0+sin(p.x*9.0-t*.9)+t*.35);'+
+    'c+=sin((p.x+p.y)*10.0+t*1.3);'+
+    'c=abs(c)/3.0;'+
+    'float caust=pow(max(0.0,1.0-abs(c-.5)*2.2),4.5);'+
+    'vec3 col=mix(vec3(0.0,.12,.5),vec3(.4,.85,1.0),caust);'+
+    'col+=vec3(.3,.1,0)*pow(caust,2.0);'+
+    'gl_FragColor=vec4(col,caust*.45);}',
+  transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide
+});
+var causticPlane=new THREE.Mesh(new THREE.PlaneGeometry(40,40),causticMat);
+causticPlane.position.z=-12;causticPlane.rotation.x=-.3;
+scene.add(causticPlane);
+
+// Rainbow DNA shader
+var dnaVS='varying vec3 vWP;void main(){vWP=(modelMatrix*vec4(position,1.0)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(vWP,1.0);}';
+var dnaFS='uniform float time;varying vec3 vWP;void main(){float t=fract((vWP.y+11.0)/22.0*2.0-time*.12);vec3 c;c.r=.5+.5*cos(6.28318*(t));c.g=.5+.5*cos(6.28318*(t+.333));c.b=.5+.5*cos(6.28318*(t+.667));float glow=.5+.5*sin(time*3.0+vWP.y*.8);c+=vec3(glow*.15);gl_FragColor=vec4(c,.88);}';
+var dnaUniforms={time:{value:0}};
+
+// Gem/crystal shader for hearts
+var gemVS='varying vec3 vN;varying vec3 vVP;void main(){vN=normalize(normalMatrix*normal);vVP=-vec3(modelViewMatrix*vec4(position,1.0));gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}';
+var gemFS='uniform float time;varying vec3 vN;varying vec3 vVP;void main(){vec3 n=normalize(vN);vec3 v=normalize(vVP);float fr=pow(1.0-max(dot(n,v),0.0),2.8);vec3 base=vec3(1.0,.38,.52);vec3 hi=vec3(1.0,.92,.6);vec3 col=mix(base,hi,fr);float sh=.5+.5*sin(dot(n,vec3(1.,2.,3.))*9.0+time*2.5);col+=vec3(sh*.25);col+=vec3(.3,.15,0)*fr*.6;gl_FragColor=vec4(col,.94);}';
+var gemUniforms={time:{value:0}};
+
+// Heat haze / distortion (subtle wavy plane near DNA)
+var hazeMat=new THREE.ShaderMaterial({
+  uniforms:{time:{value:0}},
+  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+  fragmentShader:'uniform float time;varying vec2 vUv;void main(){float heat=sin(vUv.y*30.0+time*4.0)*sin(vUv.x*20.0+time*3.0)*.5+.5;gl_FragColor=vec4(1.,1.,1.,heat*.04);}',
+  transparent:true,blending:THREE.AdditiveBlending,depthWrite:false
+});
+var hazePlane=new THREE.Mesh(new THREE.PlaneGeometry(12,24),hazeMat);
+hazePlane.position.set(3.5,0,-4);hazePlane.visible=false;scene.add(hazePlane);
+
+// ── PARTICLES (round circular blobs) ─────────────────────
+function cloud(n,spread,r,g,b,sz,op){
+  var geo=new THREE.BufferGeometry();var pos=new Float32Array(n*3);
+  for(var i=0;i<n;i++){var R=spread*Math.pow(Math.random(),.42),th=Math.random()*Math.PI*2,ph=Math.random()*Math.PI;
+    pos[i*3]=R*Math.sin(ph)*Math.cos(th)+(Math.random()-.5)*spread*.22;
+    pos[i*3+1]=R*Math.sin(ph)*Math.sin(th);pos[i*3+2]=R*Math.cos(ph)-12;}
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  var tex=circleTex(r,g,b);
+  return new THREE.Points(geo,new THREE.PointsMaterial({map:tex,alphaMap:tex,alphaTest:.01,color:new THREE.Color(r/255,g/255,b/255),size:sz,transparent:true,opacity:op,sizeAttenuation:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+}
+var stars =cloud(5500,32,255,242,222,.048,.72);
+var nebR  =cloud(3200,22,255,143,163,.12,.65);
+var nebG  =cloud(2600,26,255,209,102,.095,.55);
+var nebP  =cloud(1900,18,197,139,255,.085,.48);
+var nebT  =cloud(1400,14,124,196,255,.075,.4);
+[stars,nebR,nebG,nebP,nebT].forEach(function(n){scene.add(n);});
+
+// ── HEART + STAR GEOMETRIES ───────────────────────────────
+function mkHeart(){
+  var s=new THREE.Shape();
+  s.moveTo(.25,.25);s.bezierCurveTo(.25,.25,.2,0,0,0);
+  s.bezierCurveTo(-.3,0,-.3,.35,-.3,.35);s.bezierCurveTo(-.3,.55,-.1,.77,.25,.95);
+  s.bezierCurveTo(.6,.77,.8,.55,.8,.35);s.bezierCurveTo(.8,.35,.8,0,.5,0);
+  s.bezierCurveTo(.35,0,.25,.25,.25,.25);
+  var g=new THREE.ExtrudeGeometry(s,{depth:.32,bevelEnabled:true,bevelThickness:.08,bevelSize:.08,bevelSegments:6,curveSegments:28});
+  g.center();return g;
+}
+function mkStar(){
+  var s=new THREE.Shape();
+  for(var i=0;i<10;i++){var r=i%2===0?1:.40,a=(i/10)*Math.PI*2-Math.PI/2;i===0?s.moveTo(Math.cos(a)*r,Math.sin(a)*r):s.lineTo(Math.cos(a)*r,Math.sin(a)*r);}
   s.closePath();
-  return s;
+  var g=new THREE.ExtrudeGeometry(s,{depth:.24,bevelEnabled:true,bevelThickness:.06,bevelSize:.06,bevelSegments:3});
+  g.center();return g;
 }
-const starGeo = new THREE.ExtrudeGeometry(makeStarShape(),{depth:.2,bevelEnabled:true,bevelThickness:.04,bevelSize:.04,bevelSegments:2});
-starGeo.center();
+var HG=mkHeart(),SG=mkStar();
+var PAL=[[255,93,115],[255,143,163],[255,209,102],[255,178,107],[197,139,255],[124,196,255],[123,227,177],[245,151,142]];
 
-// ─── Main floating objects ────────────────────────────
-const palette = [0xff5d73,0xff8fa3,0xffd166,0xffb26b,0xc58bff,0x7cc4ff,0x7be3b1];
-const floaters = [];
-for(let i=0;i<22;i++){
-  const isHeart = Math.random()<.55;
-  const mat = new THREE.MeshPhongMaterial({
-    color: palette[Math.floor(Math.random()*palette.length)],
-    shininess:120, transparent:true, opacity:.92,
-    emissive: palette[Math.floor(Math.random()*palette.length)], emissiveIntensity:.12
-  });
-  const m = new THREE.Mesh(isHeart?heartGeo:starGeo, mat);
-  const sc = .35 + Math.random()*.9;
-  m.scale.setScalar(sc);
-  m.position.set((Math.random()-0.5)*26,(Math.random()-0.5)*18, Math.random()*4-4);
-  m.userData = {
-    baseScale:sc, vy:.003+Math.random()*.005, vx:(Math.random()-.5)*.004,
-    wobble:Math.random()*Math.PI*2, spinSpeed:(Math.random()-.5)*.03, isHeart
-  };
-  scene.add(m);
-  floaters.push(m);
+// ── FLOATING HEARTS/STARS with GEM SHADER + HALOS ────────
+var floaters=[];
+for(var i=0;i<30;i++){
+  var rgb=PAL[i%PAL.length];var r=rgb[0],g=rgb[1],b=rgb[2];
+  var isHeart=Math.random()<.55;
+  // Use gem shader for hearts, phong for stars
+  var mat=isHeart?
+    new THREE.ShaderMaterial({vertexShader:gemVS,fragmentShader:gemFS,uniforms:{time:{value:0}},transparent:true,side:THREE.DoubleSide}):
+    new THREE.MeshPhongMaterial({color:new THREE.Color(r/255,g/255,b/255),emissive:new THREE.Color(r/510,g/510,b/510),emissiveIntensity:.4,shininess:200,transparent:true,opacity:.94,specular:new THREE.Color(.9,.9,.9)});
+  var mesh=new THREE.Mesh(isHeart?HG:SG,mat);
+  var sc=.28+Math.random()*.9;mesh.scale.setScalar(sc);
+  var px=(Math.random()-.5)*30,py=(Math.random()-.5)*20,pz=Math.random()*6-4;
+  mesh.position.set(px,py,pz);
+  var glow=glowSp(r,g,b,sc*5.5);glow.position.set(px,py,pz-.6);
+  mesh.userData={sc:sc,vy:.003+Math.random()*.006,vx:(Math.random()-.5)*.004,wobble:Math.random()*Math.PI*2,spin:(Math.random()-.5)*.032,glow:glow,isHeart:isHeart};
+  scene.add(mesh);scene.add(glow);floaters.push(mesh);
 }
 
-// ─── Nebula particle cloud ────────────────────────────
-function makeParticleCloud(count, spread, colorHex, size, opacity){
-  const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(count*3);
-  for(let i=0;i<count;i++){
-    const r = spread*(Math.pow(Math.random(),.5));
-    const theta = Math.random()*Math.PI*2;
-    const phi = Math.random()*Math.PI;
-    pos[i*3] = r*Math.sin(phi)*Math.cos(theta) + (Math.random()-.5)*spread*.3;
-    pos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
-    pos[i*3+2] = r*Math.cos(phi) - 8;
+// ── CRYSTAL ORBS ─────────────────────────────────────────
+var orbList=[];
+for(var i=0;i<12;i++){
+  var rgb=PAL[i%PAL.length];var r=rgb[0],g=rgb[1],b=rgb[2];
+  var rad=.4+Math.random()*1.1;
+  var orb=new THREE.Mesh(new THREE.SphereGeometry(rad,36,36),
+    new THREE.MeshPhongMaterial({color:new THREE.Color(r/255*.5,g/255*.5,b/255*.5),emissive:new THREE.Color(r/255*.22,g/255*.22,b/255*.22),emissiveIntensity:.6,shininess:360,transparent:true,opacity:.58,specular:new THREE.Color(1,1,1)}));
+  var atm=new THREE.Mesh(new THREE.SphereGeometry(rad*1.45,14,14),
+    new THREE.MeshBasicMaterial({color:new THREE.Color(r/255,g/255,b/255),transparent:true,opacity:.065,side:THREE.BackSide}));
+  var gs=glowSp(r,g,b,rad*8);
+  var ox=(Math.random()-.5)*26,oy=(Math.random()-.5)*18,oz=Math.random()*4-4;
+  orb.position.set(ox,oy,oz);atm.position.set(ox,oy,oz);gs.position.set(ox,oy,oz-.8);
+  orb.userData={vy:.002+Math.random()*.005,vx:(Math.random()-.5)*.003,wobble:Math.random()*Math.PI*2,glow:gs,atm:atm};
+  scene.add(orb);scene.add(atm);scene.add(gs);orbList.push(orb);
+}
+
+// ── DNA HELIX (rainbow shader + bioluminescent nodes) ─────
+var helixGroup=new THREE.Group();
+for(var strand=0;strand<2;strand++){
+  var pts=[];
+  for(var j=0;j<=100;j++){var t=(j/100)*Math.PI*9,off=strand?Math.PI:0;pts.push(new THREE.Vector3(Math.cos(t+off)*2.8,t*.52-11.7,Math.sin(t+off)*1.2));}
+  var tube=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),100,.07,12,false);
+  helixGroup.add(new THREE.Mesh(tube,new THREE.ShaderMaterial({vertexShader:dnaVS,fragmentShader:dnaFS,uniforms:dnaUniforms,transparent:true,depthWrite:false})));
+}
+// Cross bridges
+for(var i=0;i<22;i++){
+  var t=(i/22)*Math.PI*9;
+  var p1=new THREE.Vector3(Math.cos(t)*2.8,t*.52-11.7,Math.sin(t)*1.2);
+  var p2=new THREE.Vector3(Math.cos(t+Math.PI)*2.8,t*.52-11.7,Math.sin(t+Math.PI)*1.2);
+  var bg=new THREE.TubeGeometry(new THREE.CatmullRomCurve3([p1,p2]),6,.04,6,false);
+  helixGroup.add(new THREE.Mesh(bg,new THREE.MeshPhongMaterial({color:0xffd166,emissive:0xffb26b,emissiveIntensity:.6,transparent:true,opacity:.72,shininess:200})));
+}
+// Bioluminescent nodes
+var nodeGeo=new THREE.SphereGeometry(.12,10,10);
+for(var i=0;i<18;i++){
+  var t=(i/18)*Math.PI*9,off=Math.random()>0.5?Math.PI:0;
+  var pos=new THREE.Vector3(Math.cos(t+off)*2.8,t*.52-11.7,Math.sin(t+off)*1.2);
+  var rgb=PAL[i%PAL.length];var r=rgb[0],g2=rgb[1],b=rgb[2];
+  var node=new THREE.Mesh(nodeGeo,new THREE.MeshPhongMaterial({color:new THREE.Color(r/255,g2/255,b/255),emissive:new THREE.Color(r/255,g2/255,b/255),emissiveIntensity:1.2,shininess:80}));
+  node.position.copy(pos);
+  var ng=glowSp(r,g2,b,2.2);ng.position.copy(pos);
+  helixGroup.add(node);helixGroup.add(ng);
+}
+helixGroup.add(glowSp(120,200,255,28));
+helixGroup.position.set(3.5,0,-4);helixGroup.visible=false;scene.add(helixGroup);
+
+// ── EARTH ─────────────────────────────────────────────────
+var earthGroup=new THREE.Group();var ER=4.0;
+earthGroup.add(new THREE.Mesh(new THREE.SphereGeometry(ER,64,64),
+  new THREE.MeshPhongMaterial({color:0x0a3080,emissive:0x060f2e,emissiveIntensity:.55,shininess:90,specular:new THREE.Color(.3,.5,.85)})));
+earthGroup.add(new THREE.Mesh(new THREE.SphereGeometry(ER+.42,32,32),
+  new THREE.MeshBasicMaterial({color:0x3366dd,transparent:true,opacity:.12,side:THREE.BackSide})));
+// God rays around earth
+for(var i=0;i<8;i++){
+  var ra=(i/8)*Math.PI*2;
+  var ray=new THREE.Mesh(new THREE.PlaneGeometry(.15,10),
+    new THREE.MeshBasicMaterial({color:0x4488ff,transparent:true,opacity:.06,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+  ray.position.set(Math.cos(ra)*ER*.9,Math.sin(ra)*ER*.9,0);
+  ray.rotation.z=ra;earthGroup.add(ray);
+}
+// Continents
+var conts=[{lat:45,lon:-100,size:.88,c:0x3a7a22},{lat:32,lon:-92,size:.5,c:0x4a8a30},{lat:-14,lon:-54,size:.72,c:0x2d6a1d},{lat:56,lon:12,size:.52,c:0x4a7a3a},{lat:44,lon:28,size:.4,c:0x3d6a2d},{lat:5,lon:22,size:.82,c:0x3d7a2d},{lat:-26,lon:24,size:.6,c:0x4a7a28},{lat:50,lon:60,size:1.05,c:0x3a6a28},{lat:34,lon:100,size:.9,c:0x4a7a28},{lat:15,lon:76,size:.58,c:0x5a8a38},{lat:-24,lon:133,size:.68,c:0x7a6a28},{lat:70,lon:-40,size:.36,c:0xaaaacc}];
+conts.forEach(function(d){
+  var p=ll(d.lat,d.lon,ER+.05);
+  var patch=new THREE.Mesh(new THREE.SphereGeometry(d.size*.35,10,10),new THREE.MeshPhongMaterial({color:d.c,emissive:0x0a1808,emissiveIntensity:.1,shininess:15}));
+  patch.position.copy(p);patch.lookAt(0,0,0);patch.scale.z=.14;earthGroup.add(patch);
+});
+// Kindness pins + glows
+var pinGeo=new THREE.SphereGeometry(.09,10,10);
+for(var i=0;i<24;i++){
+  var rgb=PAL[i%PAL.length];var r=rgb[0],g=rgb[1],b=rgb[2];
+  var pos=ll((Math.random()-.2)*130,Math.random()*360-180,ER+.16);
+  var pin=new THREE.Mesh(pinGeo,new THREE.MeshPhongMaterial({color:new THREE.Color(r/255,g/255,b/255),emissive:new THREE.Color(r/255,g/255,b/255),emissiveIntensity:1.0}));
+  pin.position.copy(pos);
+  var pg=glowSp(r,g,b,1.6);pg.position.copy(pos);
+  earthGroup.add(pin);earthGroup.add(pg);
+}
+earthGroup.add(glowSp(68,130,255,20));
+earthGroup.position.set(0,0,-6);earthGroup.visible=false;scene.add(earthGroup);
+
+// ── FRACTAL FLOWERS ───────────────────────────────────────
+var flowerGroup=new THREE.Group();
+function mkPetal(){
+  var s=new THREE.Shape();
+  s.moveTo(0,0);s.bezierCurveTo(.18,.45,.22,1.1,0,1.5);s.bezierCurveTo(-.22,1.1,-.18,.45,0,0);
+  var g=new THREE.ExtrudeGeometry(s,{depth:.04,bevelEnabled:false,curveSegments:16});g.center();return g;
+}
+var petalGeo=mkPetal();
+var flowerColors=[[255,143,163],[255,209,102],[197,139,255],[124,196,255],[123,227,177]];
+var petalMeshes=[];
+for(var f=0;f<6;f++){
+  var fg=new THREE.Group();
+  var fc=flowerColors[f%flowerColors.length];
+  var fx=(Math.random()-.5)*18,fy=(Math.random()-.5)*12,fz=Math.random()*3-3;
+  fg.position.set(fx,fy,fz);
+  for(var p=0;p<8;p++){
+    var petal=new THREE.Mesh(petalGeo,new THREE.MeshPhongMaterial({color:new THREE.Color(fc[0]/255,fc[1]/255,fc[2]/255),emissive:new THREE.Color(fc[0]/512,fc[1]/512,fc[2]/512),emissiveIntensity:.5,transparent:true,opacity:.88,shininess:120,side:THREE.DoubleSide}));
+    petal.rotation.z=(p/8)*Math.PI*2;
+    petal.scale.set(0,0,0);
+    fg.add(petal);petalMeshes.push(petal);
   }
-  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
-  const mat = new THREE.PointsMaterial({color:colorHex, size, transparent:true, opacity, sizeAttenuation:true, blending:THREE.AdditiveBlending, depthWrite:false});
-  return new THREE.Points(geo, mat);
+  // Flower center glow
+  fg.add(glowSp(fc[0],fc[1],fc[2],3.5));
+  flowerGroup.add(fg);
 }
-const nebula1 = makeParticleCloud(3200, 18, 0xff8fa3, .08, .65);
-const nebula2 = makeParticleCloud(2400, 22, 0xffd166, .06, .5);
-const nebula3 = makeParticleCloud(1800, 14, 0xc58bff, .07, .45);
-const nebula4 = makeParticleCloud(1400, 10, 0x7cc4ff, .05, .4);
-[nebula1,nebula2,nebula3,nebula4].forEach(n=>scene.add(n));
+flowerGroup.visible=false;scene.add(flowerGroup);
+var flowerBloom=0; // 0-1 animation progress
 
-// ─── DNA helix ────────────────────────────────────────
-const helixGroup = new THREE.Group();
-for(let strand=0;strand<2;strand++){
-  const pts = [];
-  for(let i=0;i<=80;i++){
-    const t = (i/80)*Math.PI*8;
-    const offset = strand===0?0:Math.PI;
-    pts.push(new THREE.Vector3(Math.cos(t+offset)*2.8, t*.55-11, Math.sin(t+offset)*1.2));
+// ── TINY HUMANOID FIGURES ─────────────────────────────────
+var figureGroup=new THREE.Group();
+function mkFigure(r,g,b,x,y){
+  var gr=new THREE.Group();
+  var mat=new THREE.MeshPhongMaterial({color:new THREE.Color(r/255,g/255,b/255),emissive:new THREE.Color(r/255*.2,g/255*.2,b/255*.2),emissiveIntensity:.3,shininess:60});
+  // Body
+  var body=new THREE.Mesh(new THREE.CylinderGeometry(.1,.13,.48,8),mat);gr.add(body);
+  // Head
+  var head=new THREE.Mesh(new THREE.SphereGeometry(.13,10,10),mat);head.position.y=.38;gr.add(head);
+  // Arms (reaching out)
+  var aG=new THREE.CylinderGeometry(.035,.035,.38,6);
+  var arm1=new THREE.Mesh(aG,mat);arm1.position.set(.22,.12,0);arm1.rotation.z=Math.PI/4;gr.add(arm1);
+  var arm2=new THREE.Mesh(aG,mat);arm2.position.set(-.22,.12,0);arm2.rotation.z=-Math.PI/4;gr.add(arm2);
+  // Hands (small spheres at arm tips)
+  var hMat=new THREE.MeshPhongMaterial({color:new THREE.Color(r/255*.8,g/255*.8,b/255*.8),shininess:40});
+  var h1=new THREE.Mesh(new THREE.SphereGeometry(.055,8,8),hMat);h1.position.set(.38,.28,0);gr.add(h1);
+  var h2=new THREE.Mesh(new THREE.SphereGeometry(.055,8,8),hMat);h2.position.set(-.38,.28,0);gr.add(h2);
+  gr.position.set(x,y,0);gr.scale.setScalar(.55);
+  // Rim glow
+  gr.add(glowSp(r,g,b,2.5));
+  return gr;
+}
+var figureColors=[[255,143,163],[255,209,102],[124,196,255],[197,139,255],[123,227,177]];
+for(var i=0;i<8;i++){
+  var fc=figureColors[i%figureColors.length];
+  var figure=mkFigure(fc[0],fc[1],fc[2],(Math.random()-.5)*16,(Math.random()-.5)*10);
+  figureGroup.add(figure);
+}
+figureGroup.visible=false;scene.add(figureGroup);
+
+// ── MIRROR TUNNEL ─────────────────────────────────────────
+var tunnelGroup=new THREE.Group();
+for(var i=0;i<35;i++){
+  var sc=Math.pow(.89,i);
+  var ring=new THREE.Mesh(new THREE.TorusGeometry(3.5*sc,.05*sc,10,72),
+    new THREE.MeshBasicMaterial({color:i%2===0?0xff8fa3:0x7cc4ff,transparent:true,opacity:.28*(1-i/35),blending:THREE.AdditiveBlending,depthWrite:false}));
+  ring.position.z=-i*.75;
+  // Ring glow
+  var rg=glowSp(i%2===0?255:124,i%2===0?143:196,i%2===0?163:255,3.5*sc*.8);rg.position.z=-i*.75;
+  tunnelGroup.add(ring);tunnelGroup.add(rg);
+}
+tunnelGroup.visible=false;scene.add(tunnelGroup);
+
+// ── CONSTELLATION ─────────────────────────────────────────
+var constGroup=new THREE.Group();
+var spts=new Float32Array(160*3),sPos2=[];
+for(var i=0;i<160;i++){
+  var x=(Math.random()-.5)*36,y=(Math.random()-.5)*25,z=(Math.random()-.5)*10-6;
+  spts[i*3]=x;spts[i*3+1]=y;spts[i*3+2]=z;sPos2.push([x,y,z]);
+}
+var sGeo=new THREE.BufferGeometry();sGeo.setAttribute('position',new THREE.BufferAttribute(spts,3));
+var ctex=circleTex(255,209,102);
+constGroup.add(new THREE.Points(sGeo,new THREE.PointsMaterial({map:ctex,alphaMap:ctex,alphaTest:.01,color:0xffd166,size:.20,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true})));
+var lv=[];for(var i=0;i<38;i++){var a=sPos2[i],b=sPos2[(i*9+5)%160];lv.push.apply(lv,a.concat(b));}
+var lGeo=new THREE.BufferGeometry();lGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(lv),3));
+constGroup.add(new THREE.LineSegments(lGeo,new THREE.LineBasicMaterial({color:0xffd166,transparent:true,opacity:.16})));
+constGroup.visible=false;scene.add(constGroup);
+
+// ── LIGHT RIVER ──────────────────────────────────────────
+var riverGroup=new THREE.Group();var rC=3200;
+var rPts=new Float32Array(rC*3),rV=new Float32Array(rC);
+for(var i=0;i<rC;i++){rPts[i*3]=(Math.random()-.5)*24;rPts[i*3+1]=(Math.random()-.5)*28;rPts[i*3+2]=(Math.random()-.5)*8;rV[i]=.016+Math.random()*.06;}
+var rGeo=new THREE.BufferGeometry();rGeo.setAttribute('position',new THREE.BufferAttribute(rPts,3));
+var rtex=circleTex(255,209,102);
+riverGroup.add(new THREE.Points(rGeo,new THREE.PointsMaterial({map:rtex,alphaMap:rtex,alphaTest:.01,color:0xffd166,size:.095,transparent:true,opacity:.88,blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true})));
+riverGroup.visible=false;scene.add(riverGroup);
+
+// ── BURST SYSTEM ─────────────────────────────────────────
+var bCount=2200;
+var bGeo=new THREE.BufferGeometry();var bPts=new Float32Array(bCount*3);var bVels=[];
+for(var i=0;i<bCount;i++){
+  bPts[i*3]=bPts[i*3+1]=bPts[i*3+2]=0;
+  var th=Math.random()*Math.PI*2,ph=Math.random()*Math.PI,spd=.08+Math.random()*.3;
+  bVels.push({vx:Math.sin(ph)*Math.cos(th)*spd,vy:Math.sin(ph)*Math.sin(th)*spd,vz:Math.cos(ph)*spd*.38,life:1});
+}
+bGeo.setAttribute('position',new THREE.BufferAttribute(bPts,3));
+var btex=circleTex(255,209,102);
+var burstM=new THREE.Points(bGeo,new THREE.PointsMaterial({map:btex,alphaMap:btex,alphaTest:.01,color:0xffd166,size:.13,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true}));
+scene.add(burstM);var burstActive=false,burstFrame=0;
+
+// ── FILM GRAIN ───────────────────────────────────────────
+var gCv=document.getElementById('grain');
+gCv.width=innerWidth;gCv.height=innerHeight;
+gCv.style.cssText='position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;mix-blend-mode:overlay';
+var gCtx=gCv.getContext('2d');
+function updateGrain(){
+  var id=gCtx.createImageData(gCv.width,gCv.height);var d=id.data;
+  for(var i=0;i<d.length;i+=4){var v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}
+  gCtx.putImageData(id,0,0);
+}
+
+// ── LENS FLARES ───────────────────────────────────────────
+var fa=document.getElementById('fa'),fb=document.getElementById('fb'),fc2=document.getElementById('fc'),fd=document.getElementById('fd');
+function updateFlares(t){
+  fa.style.left=(innerWidth*.48+Math.sin(t*.28)*innerWidth*.32)+'px';fa.style.top=(innerHeight*.42+Math.cos(t*.22)*innerHeight*.22)+'px';
+  fb.style.left=(innerWidth*.28+Math.cos(t*.38)*innerWidth*.22)+'px';fb.style.top=(innerHeight*.58+Math.sin(t*.32)*innerHeight*.2)+'px';
+  fc2.style.left=(innerWidth*.72+Math.sin(t*.25+1.2)*innerWidth*.16)+'px';fc2.style.top=(innerHeight*.28+Math.cos(t*.2)*innerHeight*.26)+'px';
+  fd.style.left=(innerWidth*.85+Math.sin(t*.45)*innerWidth*.08)+'px';fd.style.top=(innerHeight*.7+Math.cos(t*.38)*innerHeight*.12)+'px';
+}
+
+// ── SCROLL STATE + VELOCITY ───────────────────────────────
+var scroll=0,camX=0,camY=0,camZ=20,nebOp=.65;
+var lastSY=0,scrollVel=0;
+window.addEventListener('scroll',function(){
+  var pct=scrollY/(document.body.scrollHeight-innerHeight);
+  scrollVel=Math.abs(scrollY-lastSY);lastSY=scrollY;scroll=pct;
+  // Reactive particle size based on velocity
+  var boost=Math.min(scrollVel*.003,.1);
+  nebR.material.size=.12+boost;burstM.material.size=.13+boost*.8;
+  if(pct>.14&&pct<.24&&!burstActive){
+    burstActive=true;burstFrame=0;burstM.material.opacity=.92;
+    for(var i=0;i<bCount;i++){bGeo.attributes.position.array[i*3]=bGeo.attributes.position.array[i*3+1]=bGeo.attributes.position.array[i*3+2]=0;bVels[i].life=Math.random()*.9+.65;}
+    bGeo.attributes.position.needsUpdate=true;
   }
-  const curve = new THREE.CatmullRomCurve3(pts);
-  const geo = new THREE.TubeGeometry(curve, 80, .06, 8, false);
-  const mat = new THREE.MeshPhongMaterial({
-    color: strand===0?0xff8fa3:0x7cc4ff,
-    emissive: strand===0?0xff5d73:0x4499ff, emissiveIntensity:.3,
-    transparent:true, opacity:.8, shininess:80
-  });
-  helixGroup.add(new THREE.Mesh(geo, mat));
-}
-// Cross-bridges
-for(let i=0;i<16;i++){
-  const t = (i/16)*Math.PI*8;
-  const p1 = new THREE.Vector3(Math.cos(t)*2.8, t*.55-11, Math.sin(t)*1.2);
-  const p2 = new THREE.Vector3(Math.cos(t+Math.PI)*2.8, t*.55-11, Math.sin(t+Math.PI)*1.2);
-  const curve = new THREE.CatmullRomCurve3([p1,p2]);
-  const geo = new THREE.TubeGeometry(curve, 8, .035, 6, false);
-  const mat = new THREE.MeshPhongMaterial({color:0xffd166, emissive:0xffb26b, emissiveIntensity:.4, transparent:true, opacity:.6});
-  helixGroup.add(new THREE.Mesh(geo, mat));
-}
-helixGroup.position.set(0,0,-6);
-helixGroup.visible = false;
-scene.add(helixGroup);
-
-// ─── Earth model ──────────────────────────────────────
-const earthGroup = new THREE.Group();
-const earthMat = new THREE.MeshPhongMaterial({color:0x0a4fa8, emissive:0x0a1f4a, emissiveIntensity:.4, shininess:60, transparent:true, opacity:.9});
-const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(4,48,48), earthMat);
-earthGroup.add(earthMesh);
-// Continent patches (procedural landmasses)
-const landColors = [0x2d6a2d,0x3d8a3d,0x4a9a4a,0x557755];
-for(let i=0;i<22;i++){
-  const phi = Math.random()*Math.PI;
-  const theta = Math.random()*Math.PI*2;
-  const r = 4.02;
-  const lm = new THREE.Mesh(
-    new THREE.SphereGeometry(.3+Math.random()*.7, 8, 8),
-    new THREE.MeshPhongMaterial({color:landColors[i%4],emissive:0x1a4a1a,emissiveIntensity:.2})
-  );
-  lm.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
-  earthGroup.add(lm);
-}
-// Atmosphere glow
-const atmMesh = new THREE.Mesh(
-  new THREE.SphereGeometry(4.3,32,32),
-  new THREE.MeshBasicMaterial({color:0x4499ff, transparent:true, opacity:.12, side:THREE.BackSide})
-);
-earthGroup.add(atmMesh);
-// Kindness pins on earth
-const pinGeo = new THREE.SphereGeometry(.09,8,8);
-for(let i=0;i<18;i++){
-  const phi = Math.random()*Math.PI;
-  const theta = Math.random()*Math.PI*2;
-  const r = 4.12;
-  const pin = new THREE.Mesh(pinGeo, new THREE.MeshPhongMaterial({
-    color:palette[i%palette.length], emissive:palette[i%palette.length], emissiveIntensity:.8
-  }));
-  pin.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
-  earthGroup.add(pin);
-}
-earthGroup.position.set(0,0,-8);
-earthGroup.visible = false;
-scene.add(earthGroup);
-
-// ─── Constellation ────────────────────────────────────
-const constGroup = new THREE.Group();
-const starPositions = [];
-const starCount = 120;
-const starPts = new Float32Array(starCount*3);
-for(let i=0;i<starCount;i++){
-  const x=(Math.random()-.5)*30, y=(Math.random()-.5)*20, z=(Math.random()-.5)*8-4;
-  starPts[i*3]=x; starPts[i*3+1]=y; starPts[i*3+2]=z;
-  starPositions.push([x,y,z]);
-}
-const starGeo2 = new THREE.BufferGeometry();
-starGeo2.setAttribute('position', new THREE.BufferAttribute(starPts,3));
-const starMat2 = new THREE.PointsMaterial({color:0xffd166, size:.14, transparent:true, opacity:.9, blending:THREE.AdditiveBlending});
-constGroup.add(new THREE.Points(starGeo2, starMat2));
-// Line connections
-const lineGeo = new THREE.BufferGeometry();
-const lineVerts = [];
-for(let i=0;i<28;i++){
-  const a = starPositions[i], b = starPositions[(i+7)%starCount];
-  lineVerts.push(...a,...b);
-}
-lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVerts),3));
-constGroup.add(new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({color:0xffd166, transparent:true, opacity:.2})));
-constGroup.visible = false;
-scene.add(constGroup);
-
-// ─── Light river (particle stream) ───────────────────
-const riverGroup = new THREE.Group();
-const riverPts = new Float32Array(2000*3);
-const riverVels = new Float32Array(2000);
-for(let i=0;i<2000;i++){
-  riverPts[i*3] = (Math.random()-.5)*20;
-  riverPts[i*3+1] = (Math.random()-.5)*24;
-  riverPts[i*3+2] = (Math.random()-.5)*6;
-  riverVels[i] = .02+Math.random()*.06;
-}
-const riverGeo = new THREE.BufferGeometry();
-riverGeo.setAttribute('position', new THREE.BufferAttribute(riverPts,3));
-const riverMesh = new THREE.Points(riverGeo, new THREE.PointsMaterial({
-  color:0xffd166, size:.07, transparent:true, opacity:.8,
-  blending:THREE.AdditiveBlending, depthWrite:false
-}));
-riverGroup.add(riverMesh);
-riverGroup.visible = false;
-scene.add(riverGroup);
-
-// ─── Big burst system ─────────────────────────────────
-const burstGeo = new THREE.BufferGeometry();
-const bPts = new Float32Array(1600*3);
-const bVels = [];
-for(let i=0;i<1600;i++){
-  bPts[i*3]=0; bPts[i*3+1]=0; bPts[i*3+2]=0;
-  const theta = Math.random()*Math.PI*2, phi = Math.random()*Math.PI;
-  const spd = .12+Math.random()*.28;
-  bVels.push({
-    vx:Math.sin(phi)*Math.cos(theta)*spd,
-    vy:Math.sin(phi)*Math.sin(theta)*spd,
-    vz:Math.cos(phi)*spd*.5, life:1, maxLife:1
-  });
-}
-burstGeo.setAttribute('position', new THREE.BufferAttribute(bPts,3));
-const burstMesh = new THREE.Points(burstGeo, new THREE.PointsMaterial({
-  color:0xffd166, size:.09, transparent:true, opacity:0,
-  blending:THREE.AdditiveBlending, depthWrite:false
-}));
-scene.add(burstMesh);
-let burstActive = false, burstFrame = 0;
-
-// ─── State machine driven by scroll ──────────────────
-let state = {
-  scroll: 0,
-  cameraZ: 18,
-  cameraX: 0,
-  cameraY: 0,
-  nebulaOpacity: .65,
-  helixVisible: false,
-  earthVisible: false,
-  constVisible: false,
-  riverVisible: false,
-  floaterScale: 1,
-};
-
-// ─── Scroll → scene state ─────────────────────────────
-window.addEventListener('scroll', ()=>{
-  const pct = scrollY / (document.body.scrollHeight - innerHeight);
-  state.scroll = pct;
-
-  // Zone 0–15%: hero
-  // Zone 15–35%: burst + floaters spread out
-  // Zone 35–50%: DNA helix + constellation
-  // Zone 50–65%: Earth
-  // Zone 65–80%: light rivers
-  // Zone 80–100%: convergence
-
-  if(pct < .15){
-    state.cameraZ = 18;
-    state.cameraX = 0;
-    state.cameraY = 0;
-    helixGroup.visible = false;
-    earthGroup.visible = false;
-    constGroup.visible = false;
-    riverGroup.visible = false;
-  } else if(pct < .22 && !burstActive){
-    burstActive = true;
-    burstFrame = 0;
-    burstMesh.material.opacity = .85;
-    for(let i=0;i<1600;i++){
-      burstGeo.attributes.position.array[i*3]=0;
-      burstGeo.attributes.position.array[i*3+1]=0;
-      burstGeo.attributes.position.array[i*3+2]=0;
-      bVels[i].life = bVels[i].maxLife = Math.random()*.8+.6;
-    }
-    burstGeo.attributes.position.needsUpdate = true;
-  }
-
-  if(pct > .35 && pct < .65){
-    helixGroup.visible = true;
-    constGroup.visible = true;
-    const t = (pct-.35)/.3;
-    helixGroup.material && (helixGroup.children.forEach(c=>{ if(c.material) c.material.opacity = Math.min(.9, t*2); }));
-    constGroup.children.forEach(c=>{ if(c.material) c.material.opacity = t*.9; });
-  } else {
-    helixGroup.visible = false; constGroup.visible = false;
-  }
-
-  if(pct > .5 && pct < .75){
-    earthGroup.visible = true;
-    const t = Math.min(1,(pct-.5)/.1);
-    earthMesh.material.opacity = t*.9;
-  } else { earthGroup.visible = false; }
-
-  if(pct > .65){
-    riverGroup.visible = true;
-    riverMesh.material.opacity = Math.min(.8,(pct-.65)/.1);
-  } else { riverGroup.visible = false; }
-
-  // Camera drift
-  state.cameraX = Math.sin(pct * Math.PI * 2.5) * 2.2;
-  state.cameraY = Math.cos(pct * Math.PI * 1.8) * 1.4;
-  state.cameraZ = 18 - pct * 5;
-  state.nebulaOpacity = pct > .8 ? .3 : .65;
+  helixGroup.visible=(pct>.28&&pct<.58);
+  hazePlane.visible=(pct>.28&&pct<.58);
+  constGroup.visible=(pct>.28&&pct<.62);
+  earthGroup.visible=(pct>.42&&pct<.72);
+  flowerGroup.visible=(pct>.38&&pct<.68);
+  figureGroup.visible=(pct>.48&&pct<.72);
+  tunnelGroup.visible=(pct>.7);
+  riverGroup.visible=(pct>.6);
+  flowerBloom=pct>.38?Math.min(1,(pct-.38)/.2):0;
+  camX=Math.sin(pct*Math.PI*2.4)*2.8;camY=Math.cos(pct*Math.PI*1.8)*1.8;camZ=20-pct*5.5;
+  nebOp=pct>.82?.25:.65;
 });
 
-// ─── Text section reveals (GSAP) ─────────────────────
-['s1','s2','s3','s4','s5','s6','s7'].forEach((id, i) => {
-  const el = document.getElementById(id);
-  gsap.to(el, {
-    opacity:1, y:0, duration:.8, ease:'power2.out',
-    scrollTrigger:{ trigger:'#'+id, start:'top 75%', end:'bottom 30%', toggleActions:'play reverse play reverse' }
-  });
-  gsap.set(el, {y:40});
+// ── GSAP REVEALS ─────────────────────────────────────────
+['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(function(id){
+  var el=document.getElementById(id);gsap.set(el,{y:55});
+  gsap.to(el,{opacity:1,y:0,duration:1.0,ease:'power2.out',scrollTrigger:{trigger:'#'+id,start:'top 70%',end:'bottom 26%',toggleActions:'play reverse play reverse'}});
 });
-
-// ─── Number counters ──────────────────────────────────
-function animateCount(el, target){
-  let v = 0;
-  const step = target/60;
-  const t = setInterval(()=>{ v = Math.min(v+step, target); el.textContent = Math.floor(v).toLocaleString()+(target===20?'':'+'); if(v>=target) clearInterval(t); },16);
-}
-ScrollTrigger.create({trigger:'#s1', start:'top 70%', onEnter:()=>{
-  animateCount(document.getElementById('cnt1'), 500);
-  animateCount(document.getElementById('cnt2'), 5);
-  animateCount(document.getElementById('cnt3'), 20);
+function aC(el,target,suf){var v=0,st=target/58;var ti=setInterval(function(){v=Math.min(v+st,target);el.textContent=Math.floor(v)+(suf||'');if(v>=target)clearInterval(ti);},16);}
+ScrollTrigger.create({trigger:'#s1',start:'top 65%',onEnter:function(){
+  aC(document.getElementById('c1'),500,'+');aC(document.getElementById('c2'),5,'+');aC(document.getElementById('c3'),20,'');
 }});
 
-// ─── Clock ────────────────────────────────────────────
-const clock = new THREE.Clock();
-let mouseX = 0, mouseY = 0;
-window.addEventListener('mousemove', e=>{ mouseX=(e.clientX/innerWidth-.5)*2; mouseY=-(e.clientY/innerHeight-.5)*2; });
+// ── MOUSE ────────────────────────────────────────────────
+var mx=0,my=0;
+window.addEventListener('mousemove',function(e){mx=(e.clientX/innerWidth-.5)*2;my=-(e.clientY/innerHeight-.5)*2;});
 
-// ─── Animate ──────────────────────────────────────────
+// ── ANIMATE ──────────────────────────────────────────────
+var clock=new THREE.Clock();var grainTick=0;
 function animate(){
   requestAnimationFrame(animate);
-  const t = clock.getElapsedTime();
-  const pct = state.scroll;
+  var t=clock.getElapsedTime();
 
   // Camera
-  camera.position.x += (state.cameraX + mouseX*.8 - camera.position.x)*.04;
-  camera.position.y += (state.cameraY + mouseY*.5 - camera.position.y)*.04;
-  camera.position.z += (state.cameraZ - camera.position.z)*.05;
+  camera.position.x+=(camX+mx*.8-camera.position.x)*.038;
+  camera.position.y+=(camY+my*.48-camera.position.y)*.038;
+  camera.position.z+=(camZ-camera.position.z)*.048;
   camera.lookAt(0,0,0);
 
+  // Gem shader uniforms
+  gemUniforms.time.value=t;dnaUniforms.time.value=t;causticMat.uniforms.time.value=t;hazeMat.uniforms.time.value=t;
+
   // Floaters
-  floaters.forEach((f,i)=>{
-    const u = f.userData;
-    f.position.y += u.vy;
-    f.position.x += u.vx + Math.sin(t*.9+u.wobble)*.004;
-    f.rotation.z += u.spinSpeed;
-    f.rotation.y += u.spinSpeed*.7;
-    const pulse = 1+Math.sin(t*2.2+u.wobble)*.08;
-    f.scale.setScalar(u.baseScale*pulse);
-    if(f.position.y>11) f.position.y = -11;
+  floaters.forEach(function(f){
+    var u=f.userData;
+    f.position.y+=u.vy;f.position.x+=u.vx+Math.sin(t*.85+u.wobble)*.005;
+    f.rotation.z+=u.spin;f.rotation.y+=u.spin*.7;
+    f.scale.setScalar(u.sc*(1+Math.sin(t*2.2+u.wobble)*.1));
+    if(f.position.y>13)f.position.y=-13;
+    u.glow.position.x=f.position.x;u.glow.position.y=f.position.y;
+    if(f.isHeart&&f.material.uniforms)f.material.uniforms.time.value=t;
   });
 
-  // Nebula rotation
-  nebula1.rotation.y = t*.012;  nebula1.rotation.x = Math.sin(t*.007)*.08;
-  nebula2.rotation.y = -t*.009; nebula2.rotation.z = t*.006;
-  nebula3.rotation.y = t*.008;  nebula3.rotation.x = Math.cos(t*.011)*.06;
-  nebula4.rotation.z = t*.007;
-  nebula1.material.opacity = state.nebulaOpacity;
-  nebula2.material.opacity = state.nebulaOpacity*.77;
-  nebula3.material.opacity = state.nebulaOpacity*.7;
+  // Orbs
+  orbList.forEach(function(orb){
+    var u=orb.userData;
+    orb.position.y+=u.vy;orb.position.x+=Math.sin(t*.7+u.wobble)*.004;
+    var pulse=1+Math.sin(t*1.8+u.wobble)*.07;orb.scale.setScalar(pulse);
+    if(orb.position.y>13)orb.position.y=-13;
+    if(u.glow){u.glow.position.x=orb.position.x;u.glow.position.y=orb.position.y;}
+    if(u.atm){u.atm.position.x=orb.position.x;u.atm.position.y=orb.position.y;u.atm.scale.setScalar(pulse);}
+  });
 
-  // DNA helix spin
-  if(helixGroup.visible) helixGroup.rotation.y = t*.4;
+  // Nebulae
+  nebR.rotation.y=t*.012;nebR.rotation.x=Math.sin(t*.006)*.08;
+  nebG.rotation.y=-t*.009;nebG.rotation.z=t*.006;
+  nebP.rotation.y=t*.01;nebT.rotation.z=t*.008;stars.rotation.y=t*.003;
+  nebR.material.opacity=nebOp;nebG.material.opacity=nebOp*.76;nebP.material.opacity=nebOp*.7;nebT.material.opacity=nebOp*.62;
 
-  // Earth rotation
-  if(earthGroup.visible) earthGroup.rotation.y = t*.15;
+  // DNA
+  if(helixGroup.visible)helixGroup.rotation.y=t*.42;
 
-  // Constellation orbit
-  if(constGroup.visible){
-    constGroup.rotation.y = t*.05;
-    constGroup.rotation.x = Math.sin(t*.04)*.15;
+  // Earth
+  if(earthGroup.visible)earthGroup.rotation.y=t*.1;
+
+  // Constellation
+  if(constGroup.visible){constGroup.rotation.y=t*.05;constGroup.rotation.x=Math.sin(t*.04)*.16;}
+
+  // Fractal flower bloom
+  if(flowerGroup.visible&&petalMeshes.length){
+    petalMeshes.forEach(function(p,idx){
+      var tb=Math.min(1,flowerBloom*1.5-idx*.02);
+      var sc=Math.max(0,tb);var pulse=1+Math.sin(t*2.5+idx*.4)*.08;
+      p.scale.set(sc*pulse,sc*pulse,sc*pulse);
+      p.rotation.z+=(Math.random()-.5)*.002;
+    });
   }
 
-  // Light river: particles float upward
+  // Humanoid figures gentle sway
+  if(figureGroup.visible){
+    figureGroup.children.forEach(function(fig,i){
+      fig.rotation.y=Math.sin(t*.6+i)*.12;
+      fig.position.y+=(Math.sin(t*.5+i)*.008);
+      if(fig.position.y>7)fig.position.y=-7;
+    });
+  }
+
+  // Mirror tunnel pulse and rotate
+  if(tunnelGroup.visible){
+    tunnelGroup.rotation.z=t*.05;
+    tunnelGroup.position.z=Math.sin(t*.3)*0.5;
+    tunnelGroup.children.forEach(function(ring,i){
+      if(ring.material&&ring.geometry.type==='TorusGeometry'){
+        ring.rotation.z+=(.002+i*.0001);
+      }
+    });
+  }
+
+  // Light river
   if(riverGroup.visible){
-    const rp = riverGeo.attributes.position.array;
-    for(let i=0;i<2000;i++){
-      rp[i*3+1] += riverVels[i];
-      if(rp[i*3+1]>14) rp[i*3+1] = -14;
-    }
-    riverGeo.attributes.position.needsUpdate = true;
+    var rp=rGeo.attributes.position.array;
+    for(var i=0;i<rC;i++){rp[i*3+1]+=rV[i];if(rp[i*3+1]>16)rp[i*3+1]=-16;}
+    rGeo.attributes.position.needsUpdate=true;
   }
 
   // Burst
   if(burstActive){
-    burstFrame++;
-    const bp = burstGeo.attributes.position.array;
-    let allDead = true;
-    for(let i=0;i<1600;i++){
-      if(bVels[i].life > 0){
-        allDead = false;
-        bVels[i].life -= .016;
-        bp[i*3]   += bVels[i].vx;
-        bp[i*3+1] += bVels[i].vy;
-        bp[i*3+2] += bVels[i].vz;
-      }
+    burstFrame++;var bp=bGeo.attributes.position.array;var dead=true;
+    for(var i=0;i<bCount;i++){
+      if(bVels[i].life>0){dead=false;bVels[i].life-=.013;bp[i*3]+=bVels[i].vx;bp[i*3+1]+=bVels[i].vy;bp[i*3+2]+=bVels[i].vz;}
     }
-    burstGeo.attributes.position.needsUpdate = true;
-    if(allDead){ burstActive=false; burstMesh.material.opacity=0; }
-    else { burstMesh.material.opacity = Math.min(.9, burstFrame*.025); }
+    bGeo.attributes.position.needsUpdate=true;
+    if(dead){burstActive=false;burstM.material.opacity=0;}
+    else burstM.material.opacity=Math.min(.94,burstFrame*.02);
   }
 
-  // Lights breathe
-  rimL.intensity = 2+Math.sin(t*1.4)*.8;
-  goldL.intensity = 1.8+Math.sin(t*1.7+1)*.7;
-  goldL.position.x = Math.sin(t*.4)*10;
-  goldL.position.y = Math.cos(t*.3)*7;
+  // Dynamic lights
+  rL.intensity=2.8+Math.sin(t*1.35)*.9;gL.intensity=2.4+Math.sin(t*1.65+.8)*.85;
+  gL.position.x=Math.sin(t*.4)*12;gL.position.y=Math.cos(t*.3)*9;
+  bL.intensity=1.4+Math.sin(t*1.05+1.5)*.55;pL.intensity=1.0+Math.sin(t*.95+2.2)*.45;
 
-  renderer.render(scene, camera);
+  updateFlares(t);
+  grainTick++;if(grainTick%3===0)updateGrain();
+  renderer.render(scene,camera);
 }
 animate();
 
-// Resize
-window.addEventListener('resize',()=>{
-  camera.aspect = innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
+window.addEventListener('resize',function(){
+  camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);gCv.width=innerWidth;gCv.height=innerHeight;
 });
 </script>
 </body>
