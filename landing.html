@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Random Acts of Kindness — Particle LC</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0a0308;color:#fdf3ec;font-family:'Inter',sans-serif;overflow-x:hidden}
+#c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#scroll-root{position:relative;z-index:1;height:900vh}
+
+/* Persistent overlay */
+#crown{position:fixed;top:0;left:0;right:0;z-index:100;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+#crown-title{font-family:'Inter',sans-serif;font-size:clamp(9px,1.8vw,12px);letter-spacing:.35em;text-transform:uppercase;color:rgba(253,243,236,.75);font-weight:300}
+#crown-copy{font-size:10px;letter-spacing:.25em;color:rgba(253,243,236,.4);font-weight:300}
+#asterisk{position:fixed;bottom:28px;right:28px;z-index:100;font-size:26px;color:#ffd166;animation:astSpin 8s linear infinite,astPulse 2s ease-in-out infinite;pointer-events:none;text-shadow:0 0 20px rgba(255,209,102,.8),0 0 60px rgba(255,209,102,.4)}
+@keyframes astSpin{to{transform:rotate(360deg)}}
+@keyframes astPulse{0%,100%{opacity:.7;filter:blur(0)}50%{opacity:1;filter:blur(.5px) brightness(1.4)}}
+
+/* Text sections */
+.section{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 24px;pointer-events:none;opacity:0}
+.eyebrow{font-size:10px;letter-spacing:.45em;text-transform:uppercase;color:#ffd166;margin-bottom:18px;font-weight:400}
+.headline{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,9vw,96px);line-height:1.02;font-weight:300;color:#fdf3ec}
+.headline em{font-style:italic;background:linear-gradient(135deg,#ff8fa3,#ffd166,#ff8fa3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:shimShift 4s ease-in-out infinite}
+.sub{font-size:clamp(13px,2.2vw,18px);color:rgba(253,243,236,.6);margin-top:22px;font-weight:300;max-width:520px;line-height:1.7;letter-spacing:.02em}
+.data-row{display:flex;gap:48px;margin-top:40px;justify-content:center;flex-wrap:wrap}
+.data-item{text-align:center}
+.data-num{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,6vw,56px);font-weight:600;color:#ffd166;line-height:1}
+.data-label{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:rgba(253,243,236,.5);margin-top:6px}
+@keyframes shimShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* Hero CTA */
+#hero-cta{position:absolute;top:0;left:0;right:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center;padding:0 24px}
+#hero-title{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,11vw,120px);font-weight:300;line-height:.95;letter-spacing:-.02em;color:#fdf3ec}
+#hero-title span{display:block;font-style:italic;background:linear-gradient(120deg,#ff8fa3 0%,#ffd166 50%,#ff5d73 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:300% 300%;animation:shimShift 5s ease-in-out infinite}
+#hero-sub{font-size:clamp(12px,2vw,16px);letter-spacing:.2em;text-transform:uppercase;color:rgba(253,243,236,.5);margin-top:28px;font-weight:300}
+#hero-btn{margin-top:48px;padding:16px 44px;border:1px solid rgba(255,209,102,.5);border-radius:999px;font-size:13px;letter-spacing:.25em;text-transform:uppercase;color:#ffd166;text-decoration:none;background:rgba(255,209,102,.06);backdrop-filter:blur(8px);transition:all .4s;pointer-events:all;display:inline-block}
+#hero-btn:hover{background:rgba(255,209,102,.15);border-color:rgba(255,209,102,.9);box-shadow:0 0 40px rgba(255,209,102,.3)}
+#scroll-hint{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;opacity:.5;animation:bounce 2.4s ease-in-out infinite}
+#scroll-hint span{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#fdf3ec}
+#scroll-hint::after{content:'';width:1px;height:48px;background:linear-gradient(to bottom,rgba(253,243,236,.6),transparent)}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+
+/* Section positions */
+#s1{top:115vh;height:60vh}
+#s2{top:210vh;height:60vh}
+#s3{top:310vh;height:60vh}
+#s4{top:415vh;height:60vh}
+#s5{top:520vh;height:60vh}
+#s6{top:620vh;height:60vh}
+#s7{top:730vh;height:80vh}
+
+/* Veil effect */
+.veil{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(255,143,163,.06),transparent);pointer-events:none}
+
+/* Holographic data card */
+.holo-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,209,102,.2);border-radius:24px;padding:32px 40px;backdrop-filter:blur(20px);margin-top:36px;max-width:460px;text-align:left}
+.holo-card h4{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#ffd166;margin-bottom:16px}
+.holo-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.holo-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;animation:dotPulse 2s ease-in-out infinite}
+@keyframes dotPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.6)}}
+.holo-text{font-size:12px;color:rgba(253,243,236,.7);letter-spacing:.05em}
+
+/* Final */
+#s7 .headline{font-size:clamp(60px,13vw,160px)}
+
+@media(max-width:600px){
+  .data-row{gap:28px}
+  #hero-btn{padding:14px 32px;font-size:11px}
+  .holo-card{padding:24px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<!-- Persistent overlay -->
+<div id="crown">
+  <div id="crown-title">Random Acts of Kindness</div>
+  <div id="crown-copy">© Particle LC</div>
+</div>
+<div id="asterisk">✦</div>
+
+<!-- Hero (always visible) -->
+<div id="hero-cta">
+  <div class="veil"></div>
+  <div id="hero-title">
+    Random Acts<br/><span>of Kindness</span>
+  </div>
+  <div id="hero-sub">Every little good thing counts</div>
+  <a id="hero-btn" href="http://localhost:5173">Open the App ↗</a>
+  <div id="scroll-hint"><span>Scroll</span></div>
+</div>
+
+<!-- Scroll sections -->
+<div id="scroll-root">
+
+  <div class="section" id="s1">
+    <div class="eyebrow">Connection Quality</div>
+    <h2 class="headline">Love Without<br/><em>Boundaries</em></h2>
+    <p class="sub">Every act logged becomes a living signal — rippling outward, touching lives, growing the kindness network one honest gesture at a time.</p>
+    <div class="data-row">
+      <div class="data-item"><div class="data-num" id="cnt1">0</div><div class="data-label">Acts Possible</div></div>
+      <div class="data-item"><div class="data-num" id="cnt2">0</div><div class="data-label">Kindness Types</div></div>
+      <div class="data-item"><div class="data-num" id="cnt3">0</div><div class="data-label">Badges to Earn</div></div>
+    </div>
+  </div>
+
+  <div class="section" id="s2">
+    <div class="eyebrow">Crafted for Pure Kindness</div>
+    <h2 class="headline"><em>Unrivalled</em><br/>Connection</h2>
+    <p class="sub">Streak flames. Golden coins. 3D trophies that spin when you earn them. The most beautiful kindness tracker ever built.</p>
+  </div>
+
+  <div class="section" id="s3">
+    <div class="eyebrow">Real-Time World View</div>
+    <h2 class="headline">Global<br/><em>Kindness Map</em></h2>
+    <p class="sub">Drag the 3D globe and watch your acts become glowing pins across the world. Every location tagged, every good deed placed on the living Earth.</p>
+    <div class="holo-card">
+      <h4>Live Kindness Intelligence</h4>
+      <div class="holo-row"><div class="holo-dot" style="background:#7be3b1;animation-delay:0s"></div><div class="holo-text">Global kindness waves — real-time geo feed</div></div>
+      <div class="holo-row"><div class="holo-dot" style="background:#ffd166;animation-delay:.4s"></div><div class="holo-text">Neural empathy map — streak connections</div></div>
+      <div class="holo-row"><div class="holo-dot" style="background:#ff8fa3;animation-delay:.8s"></div><div class="holo-text">Daily auroras — your momentum made visible</div></div>
+      <div class="holo-row"><div class="holo-dot" style="background:#c58bff;animation-delay:1.2s"></div><div class="holo-text">Relationship galaxies — community bonds</div></div>
+    </div>
+  </div>
+
+  <div class="section" id="s4">
+    <div class="eyebrow">Intuitive Acts of Care</div>
+    <h2 class="headline">Log It<br/><em>Feel It</em></h2>
+    <p class="sub">One tap. A description. A feeling. A place. Your kindness is recorded, earned, and celebrated — with 3D badge trophies, streak flames, and bonus points.</p>
+  </div>
+
+  <div class="section" id="s5">
+    <div class="eyebrow">Community</div>
+    <h2 class="headline"><em>Kindness+</em><br/>Unlocked</h2>
+    <p class="sub">Hearts. Comments. Photo proof. The full social feed — live kindness from everyone, everywhere. Powered by real human goodness. Cash App simple.</p>
+    <div class="data-row">
+      <div class="data-item"><div class="data-num">$4.99</div><div class="data-label">Per Month</div></div>
+      <div class="data-item"><div class="data-num">8hr</div><div class="data-label">Max Activation</div></div>
+    </div>
+  </div>
+
+  <div class="section" id="s6">
+    <div class="eyebrow">Challenges</div>
+    <h2 class="headline">Kind 7.<br/><em>Century.</em></h2>
+    <p class="sub">Join challenges. Build a 30-day streak. Earn the legendary badge. Every day you show up, the flame grows brighter and the bonus points stack higher.</p>
+  </div>
+
+  <div class="section" id="s7">
+    <div class="eyebrow">Licensed to Particle LC</div>
+    <h2 class="headline"><em>Begin</em></h2>
+    <p class="sub">The world's most beautiful kindness tracker. Built with love. Powered by Three.js, React, and the quiet belief that one small act changes everything.</p>
+    <a id="hero-btn" href="http://localhost:5173" style="pointer-events:all;margin-top:48px;display:inline-block;padding:18px 52px;font-size:14px">Open the App ↗</a>
+  </div>
+
+</div>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ─── Three.js Scene ───────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.setClearColor(0x000000, 0);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 300);
+camera.position.set(0, 0, 18);
+
+// Lighting
+scene.add(new THREE.AmbientLight(0xfff1e6, 0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+sun.position.set(5, 8, 10);
+scene.add(sun);
+const rimL = new THREE.PointLight(0xff8fa3, 2, 40);
+rimL.position.set(-8, -4, 6);
+scene.add(rimL);
+const goldL = new THREE.PointLight(0xffd166, 1.8, 35);
+goldL.position.set(8, 6, 4);
+scene.add(goldL);
+
+// ─── Heart geometry ───────────────────────────────────
+function makeHeartShape() {
+  const s = new THREE.Shape();
+  s.moveTo(0.25,0.25);
+  s.bezierCurveTo(0.25,0.25,0.2,0,0,0);
+  s.bezierCurveTo(-0.3,0,-0.3,0.35,-0.3,0.35);
+  s.bezierCurveTo(-0.3,0.55,-0.1,0.77,0.25,0.95);
+  s.bezierCurveTo(0.6,0.77,0.8,0.55,0.8,0.35);
+  s.bezierCurveTo(0.8,0.35,0.8,0,0.5,0);
+  s.bezierCurveTo(0.35,0,0.25,0.25,0.25,0.25);
+  return s;
+}
+const heartGeo = new THREE.ExtrudeGeometry(makeHeartShape(), {depth:.28,bevelEnabled:true,bevelThickness:.06,bevelSize:.06,bevelSegments:4,curveSegments:20});
+heartGeo.center();
+
+// ─── Star shape ───────────────────────────────────────
+function makeStarShape(pts=5,r1=1,r2=.42){
+  const s = new THREE.Shape();
+  for(let i=0;i<pts*2;i++){
+    const r = i%2===0?r1:r2;
+    const a = (i/(pts*2))*Math.PI*2 - Math.PI/2;
+    i===0?s.moveTo(Math.cos(a)*r,Math.sin(a)*r):s.lineTo(Math.cos(a)*r,Math.sin(a)*r);
+  }
+  s.closePath();
+  return s;
+}
+const starGeo = new THREE.ExtrudeGeometry(makeStarShape(),{depth:.2,bevelEnabled:true,bevelThickness:.04,bevelSize:.04,bevelSegments:2});
+starGeo.center();
+
+// ─── Main floating objects ────────────────────────────
+const palette = [0xff5d73,0xff8fa3,0xffd166,0xffb26b,0xc58bff,0x7cc4ff,0x7be3b1];
+const floaters = [];
+for(let i=0;i<22;i++){
+  const isHeart = Math.random()<.55;
+  const mat = new THREE.MeshPhongMaterial({
+    color: palette[Math.floor(Math.random()*palette.length)],
+    shininess:120, transparent:true, opacity:.92,
+    emissive: palette[Math.floor(Math.random()*palette.length)], emissiveIntensity:.12
+  });
+  const m = new THREE.Mesh(isHeart?heartGeo:starGeo, mat);
+  const sc = .35 + Math.random()*.9;
+  m.scale.setScalar(sc);
+  m.position.set((Math.random()-0.5)*26,(Math.random()-0.5)*18, Math.random()*4-4);
+  m.userData = {
+    baseScale:sc, vy:.003+Math.random()*.005, vx:(Math.random()-.5)*.004,
+    wobble:Math.random()*Math.PI*2, spinSpeed:(Math.random()-.5)*.03, isHeart
+  };
+  scene.add(m);
+  floaters.push(m);
+}
+
+// ─── Nebula particle cloud ────────────────────────────
+function makeParticleCloud(count, spread, colorHex, size, opacity){
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count*3);
+  for(let i=0;i<count;i++){
+    const r = spread*(Math.pow(Math.random(),.5));
+    const theta = Math.random()*Math.PI*2;
+    const phi = Math.random()*Math.PI;
+    pos[i*3] = r*Math.sin(phi)*Math.cos(theta) + (Math.random()-.5)*spread*.3;
+    pos[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+    pos[i*3+2] = r*Math.cos(phi) - 8;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  const mat = new THREE.PointsMaterial({color:colorHex, size, transparent:true, opacity, sizeAttenuation:true, blending:THREE.AdditiveBlending, depthWrite:false});
+  return new THREE.Points(geo, mat);
+}
+const nebula1 = makeParticleCloud(3200, 18, 0xff8fa3, .08, .65);
+const nebula2 = makeParticleCloud(2400, 22, 0xffd166, .06, .5);
+const nebula3 = makeParticleCloud(1800, 14, 0xc58bff, .07, .45);
+const nebula4 = makeParticleCloud(1400, 10, 0x7cc4ff, .05, .4);
+[nebula1,nebula2,nebula3,nebula4].forEach(n=>scene.add(n));
+
+// ─── DNA helix ────────────────────────────────────────
+const helixGroup = new THREE.Group();
+for(let strand=0;strand<2;strand++){
+  const pts = [];
+  for(let i=0;i<=80;i++){
+    const t = (i/80)*Math.PI*8;
+    const offset = strand===0?0:Math.PI;
+    pts.push(new THREE.Vector3(Math.cos(t+offset)*2.8, t*.55-11, Math.sin(t+offset)*1.2));
+  }
+  const curve = new THREE.CatmullRomCurve3(pts);
+  const geo = new THREE.TubeGeometry(curve, 80, .06, 8, false);
+  const mat = new THREE.MeshPhongMaterial({
+    color: strand===0?0xff8fa3:0x7cc4ff,
+    emissive: strand===0?0xff5d73:0x4499ff, emissiveIntensity:.3,
+    transparent:true, opacity:.8, shininess:80
+  });
+  helixGroup.add(new THREE.Mesh(geo, mat));
+}
+// Cross-bridges
+for(let i=0;i<16;i++){
+  const t = (i/16)*Math.PI*8;
+  const p1 = new THREE.Vector3(Math.cos(t)*2.8, t*.55-11, Math.sin(t)*1.2);
+  const p2 = new THREE.Vector3(Math.cos(t+Math.PI)*2.8, t*.55-11, Math.sin(t+Math.PI)*1.2);
+  const curve = new THREE.CatmullRomCurve3([p1,p2]);
+  const geo = new THREE.TubeGeometry(curve, 8, .035, 6, false);
+  const mat = new THREE.MeshPhongMaterial({color:0xffd166, emissive:0xffb26b, emissiveIntensity:.4, transparent:true, opacity:.6});
+  helixGroup.add(new THREE.Mesh(geo, mat));
+}
+helixGroup.position.set(0,0,-6);
+helixGroup.visible = false;
+scene.add(helixGroup);
+
+// ─── Earth model ──────────────────────────────────────
+const earthGroup = new THREE.Group();
+const earthMat = new THREE.MeshPhongMaterial({color:0x0a4fa8, emissive:0x0a1f4a, emissiveIntensity:.4, shininess:60, transparent:true, opacity:.9});
+const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(4,48,48), earthMat);
+earthGroup.add(earthMesh);
+// Continent patches (procedural landmasses)
+const landColors = [0x2d6a2d,0x3d8a3d,0x4a9a4a,0x557755];
+for(let i=0;i<22;i++){
+  const phi = Math.random()*Math.PI;
+  const theta = Math.random()*Math.PI*2;
+  const r = 4.02;
+  const lm = new THREE.Mesh(
+    new THREE.SphereGeometry(.3+Math.random()*.7, 8, 8),
+    new THREE.MeshPhongMaterial({color:landColors[i%4],emissive:0x1a4a1a,emissiveIntensity:.2})
+  );
+  lm.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+  earthGroup.add(lm);
+}
+// Atmosphere glow
+const atmMesh = new THREE.Mesh(
+  new THREE.SphereGeometry(4.3,32,32),
+  new THREE.MeshBasicMaterial({color:0x4499ff, transparent:true, opacity:.12, side:THREE.BackSide})
+);
+earthGroup.add(atmMesh);
+// Kindness pins on earth
+const pinGeo = new THREE.SphereGeometry(.09,8,8);
+for(let i=0;i<18;i++){
+  const phi = Math.random()*Math.PI;
+  const theta = Math.random()*Math.PI*2;
+  const r = 4.12;
+  const pin = new THREE.Mesh(pinGeo, new THREE.MeshPhongMaterial({
+    color:palette[i%palette.length], emissive:palette[i%palette.length], emissiveIntensity:.8
+  }));
+  pin.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+  earthGroup.add(pin);
+}
+earthGroup.position.set(0,0,-8);
+earthGroup.visible = false;
+scene.add(earthGroup);
+
+// ─── Constellation ────────────────────────────────────
+const constGroup = new THREE.Group();
+const starPositions = [];
+const starCount = 120;
+const starPts = new Float32Array(starCount*3);
+for(let i=0;i<starCount;i++){
+  const x=(Math.random()-.5)*30, y=(Math.random()-.5)*20, z=(Math.random()-.5)*8-4;
+  starPts[i*3]=x; starPts[i*3+1]=y; starPts[i*3+2]=z;
+  starPositions.push([x,y,z]);
+}
+const starGeo2 = new THREE.BufferGeometry();
+starGeo2.setAttribute('position', new THREE.BufferAttribute(starPts,3));
+const starMat2 = new THREE.PointsMaterial({color:0xffd166, size:.14, transparent:true, opacity:.9, blending:THREE.AdditiveBlending});
+constGroup.add(new THREE.Points(starGeo2, starMat2));
+// Line connections
+const lineGeo = new THREE.BufferGeometry();
+const lineVerts = [];
+for(let i=0;i<28;i++){
+  const a = starPositions[i], b = starPositions[(i+7)%starCount];
+  lineVerts.push(...a,...b);
+}
+lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVerts),3));
+constGroup.add(new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({color:0xffd166, transparent:true, opacity:.2})));
+constGroup.visible = false;
+scene.add(constGroup);
+
+// ─── Light river (particle stream) ───────────────────
+const riverGroup = new THREE.Group();
+const riverPts = new Float32Array(2000*3);
+const riverVels = new Float32Array(2000);
+for(let i=0;i<2000;i++){
+  riverPts[i*3] = (Math.random()-.5)*20;
+  riverPts[i*3+1] = (Math.random()-.5)*24;
+  riverPts[i*3+2] = (Math.random()-.5)*6;
+  riverVels[i] = .02+Math.random()*.06;
+}
+const riverGeo = new THREE.BufferGeometry();
+riverGeo.setAttribute('position', new THREE.BufferAttribute(riverPts,3));
+const riverMesh = new THREE.Points(riverGeo, new THREE.PointsMaterial({
+  color:0xffd166, size:.07, transparent:true, opacity:.8,
+  blending:THREE.AdditiveBlending, depthWrite:false
+}));
+riverGroup.add(riverMesh);
+riverGroup.visible = false;
+scene.add(riverGroup);
+
+// ─── Big burst system ─────────────────────────────────
+const burstGeo = new THREE.BufferGeometry();
+const bPts = new Float32Array(1600*3);
+const bVels = [];
+for(let i=0;i<1600;i++){
+  bPts[i*3]=0; bPts[i*3+1]=0; bPts[i*3+2]=0;
+  const theta = Math.random()*Math.PI*2, phi = Math.random()*Math.PI;
+  const spd = .12+Math.random()*.28;
+  bVels.push({
+    vx:Math.sin(phi)*Math.cos(theta)*spd,
+    vy:Math.sin(phi)*Math.sin(theta)*spd,
+    vz:Math.cos(phi)*spd*.5, life:1, maxLife:1
+  });
+}
+burstGeo.setAttribute('position', new THREE.BufferAttribute(bPts,3));
+const burstMesh = new THREE.Points(burstGeo, new THREE.PointsMaterial({
+  color:0xffd166, size:.09, transparent:true, opacity:0,
+  blending:THREE.AdditiveBlending, depthWrite:false
+}));
+scene.add(burstMesh);
+let burstActive = false, burstFrame = 0;
+
+// ─── State machine driven by scroll ──────────────────
+let state = {
+  scroll: 0,
+  cameraZ: 18,
+  cameraX: 0,
+  cameraY: 0,
+  nebulaOpacity: .65,
+  helixVisible: false,
+  earthVisible: false,
+  constVisible: false,
+  riverVisible: false,
+  floaterScale: 1,
+};
+
+// ─── Scroll → scene state ─────────────────────────────
+window.addEventListener('scroll', ()=>{
+  const pct = scrollY / (document.body.scrollHeight - innerHeight);
+  state.scroll = pct;
+
+  // Zone 0–15%: hero
+  // Zone 15–35%: burst + floaters spread out
+  // Zone 35–50%: DNA helix + constellation
+  // Zone 50–65%: Earth
+  // Zone 65–80%: light rivers
+  // Zone 80–100%: convergence
+
+  if(pct < .15){
+    state.cameraZ = 18;
+    state.cameraX = 0;
+    state.cameraY = 0;
+    helixGroup.visible = false;
+    earthGroup.visible = false;
+    constGroup.visible = false;
+    riverGroup.visible = false;
+  } else if(pct < .22 && !burstActive){
+    burstActive = true;
+    burstFrame = 0;
+    burstMesh.material.opacity = .85;
+    for(let i=0;i<1600;i++){
+      burstGeo.attributes.position.array[i*3]=0;
+      burstGeo.attributes.position.array[i*3+1]=0;
+      burstGeo.attributes.position.array[i*3+2]=0;
+      bVels[i].life = bVels[i].maxLife = Math.random()*.8+.6;
+    }
+    burstGeo.attributes.position.needsUpdate = true;
+  }
+
+  if(pct > .35 && pct < .65){
+    helixGroup.visible = true;
+    constGroup.visible = true;
+    const t = (pct-.35)/.3;
+    helixGroup.material && (helixGroup.children.forEach(c=>{ if(c.material) c.material.opacity = Math.min(.9, t*2); }));
+    constGroup.children.forEach(c=>{ if(c.material) c.material.opacity = t*.9; });
+  } else {
+    helixGroup.visible = false; constGroup.visible = false;
+  }
+
+  if(pct > .5 && pct < .75){
+    earthGroup.visible = true;
+    const t = Math.min(1,(pct-.5)/.1);
+    earthMesh.material.opacity = t*.9;
+  } else { earthGroup.visible = false; }
+
+  if(pct > .65){
+    riverGroup.visible = true;
+    riverMesh.material.opacity = Math.min(.8,(pct-.65)/.1);
+  } else { riverGroup.visible = false; }
+
+  // Camera drift
+  state.cameraX = Math.sin(pct * Math.PI * 2.5) * 2.2;
+  state.cameraY = Math.cos(pct * Math.PI * 1.8) * 1.4;
+  state.cameraZ = 18 - pct * 5;
+  state.nebulaOpacity = pct > .8 ? .3 : .65;
+});
+
+// ─── Text section reveals (GSAP) ─────────────────────
+['s1','s2','s3','s4','s5','s6','s7'].forEach((id, i) => {
+  const el = document.getElementById(id);
+  gsap.to(el, {
+    opacity:1, y:0, duration:.8, ease:'power2.out',
+    scrollTrigger:{ trigger:'#'+id, start:'top 75%', end:'bottom 30%', toggleActions:'play reverse play reverse' }
+  });
+  gsap.set(el, {y:40});
+});
+
+// ─── Number counters ──────────────────────────────────
+function animateCount(el, target){
+  let v = 0;
+  const step = target/60;
+  const t = setInterval(()=>{ v = Math.min(v+step, target); el.textContent = Math.floor(v).toLocaleString()+(target===20?'':'+'); if(v>=target) clearInterval(t); },16);
+}
+ScrollTrigger.create({trigger:'#s1', start:'top 70%', onEnter:()=>{
+  animateCount(document.getElementById('cnt1'), 500);
+  animateCount(document.getElementById('cnt2'), 5);
+  animateCount(document.getElementById('cnt3'), 20);
+}});
+
+// ─── Clock ────────────────────────────────────────────
+const clock = new THREE.Clock();
+let mouseX = 0, mouseY = 0;
+window.addEventListener('mousemove', e=>{ mouseX=(e.clientX/innerWidth-.5)*2; mouseY=-(e.clientY/innerHeight-.5)*2; });
+
+// ─── Animate ──────────────────────────────────────────
+function animate(){
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  const pct = state.scroll;
+
+  // Camera
+  camera.position.x += (state.cameraX + mouseX*.8 - camera.position.x)*.04;
+  camera.position.y += (state.cameraY + mouseY*.5 - camera.position.y)*.04;
+  camera.position.z += (state.cameraZ - camera.position.z)*.05;
+  camera.lookAt(0,0,0);
+
+  // Floaters
+  floaters.forEach((f,i)=>{
+    const u = f.userData;
+    f.position.y += u.vy;
+    f.position.x += u.vx + Math.sin(t*.9+u.wobble)*.004;
+    f.rotation.z += u.spinSpeed;
+    f.rotation.y += u.spinSpeed*.7;
+    const pulse = 1+Math.sin(t*2.2+u.wobble)*.08;
+    f.scale.setScalar(u.baseScale*pulse);
+    if(f.position.y>11) f.position.y = -11;
+  });
+
+  // Nebula rotation
+  nebula1.rotation.y = t*.012;  nebula1.rotation.x = Math.sin(t*.007)*.08;
+  nebula2.rotation.y = -t*.009; nebula2.rotation.z = t*.006;
+  nebula3.rotation.y = t*.008;  nebula3.rotation.x = Math.cos(t*.011)*.06;
+  nebula4.rotation.z = t*.007;
+  nebula1.material.opacity = state.nebulaOpacity;
+  nebula2.material.opacity = state.nebulaOpacity*.77;
+  nebula3.material.opacity = state.nebulaOpacity*.7;
+
+  // DNA helix spin
+  if(helixGroup.visible) helixGroup.rotation.y = t*.4;
+
+  // Earth rotation
+  if(earthGroup.visible) earthGroup.rotation.y = t*.15;
+
+  // Constellation orbit
+  if(constGroup.visible){
+    constGroup.rotation.y = t*.05;
+    constGroup.rotation.x = Math.sin(t*.04)*.15;
+  }
+
+  // Light river: particles float upward
+  if(riverGroup.visible){
+    const rp = riverGeo.attributes.position.array;
+    for(let i=0;i<2000;i++){
+      rp[i*3+1] += riverVels[i];
+      if(rp[i*3+1]>14) rp[i*3+1] = -14;
+    }
+    riverGeo.attributes.position.needsUpdate = true;
+  }
+
+  // Burst
+  if(burstActive){
+    burstFrame++;
+    const bp = burstGeo.attributes.position.array;
+    let allDead = true;
+    for(let i=0;i<1600;i++){
+      if(bVels[i].life > 0){
+        allDead = false;
+        bVels[i].life -= .016;
+        bp[i*3]   += bVels[i].vx;
+        bp[i*3+1] += bVels[i].vy;
+        bp[i*3+2] += bVels[i].vz;
+      }
+    }
+    burstGeo.attributes.position.needsUpdate = true;
+    if(allDead){ burstActive=false; burstMesh.material.opacity=0; }
+    else { burstMesh.material.opacity = Math.min(.9, burstFrame*.025); }
+  }
+
+  // Lights breathe
+  rimL.intensity = 2+Math.sin(t*1.4)*.8;
+  goldL.intensity = 1.8+Math.sin(t*1.7+1)*.7;
+  goldL.position.x = Math.sin(t*.4)*10;
+  goldL.position.y = Math.cos(t*.3)*7;
+
+  renderer.render(scene, camera);
+}
+animate();
+
+// Resize
+window.addEventListener('resize',()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
