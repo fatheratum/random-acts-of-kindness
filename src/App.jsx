@@ -972,14 +972,9 @@ function AuthScreen({ onLogin, onRegister, authError, setAuthError }) {
   const back = () => { setAuthError(""); setMode("choice"); };
 
   return (
-    <div className="min-h-screen w-full" style={{ background:"linear-gradient(180deg,#170812 0%,#2a1124 55%,#170812 100%)", fontFamily:"'Outfit',system-ui,sans-serif" }}>
+    <div className="min-h-screen w-full" style={{ background:"#030106", fontFamily:"'Outfit',system-ui,sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Outfit:wght@400;600;700&display=swap');*{box-sizing:border-box}input::placeholder,textarea::placeholder{color:rgba(253,243,236,.35)}`}</style>
-      <div style={{ position:"fixed",inset:0,pointerEvents:"none",overflow:"hidden" }}>
-        {["❤️","💛","💝","🌟","✨","💕","🪶","🌸"].map((e,i)=>(
-          <span key={i} style={{ position:"absolute",fontSize:16+i*3,left:`${8+i*12}%`,top:`${4+i*11}%`,
-            animation:`rakBadgeFloat ${2.2+i*0.4}s ease-in-out infinite`,animationDelay:`${i*0.45}s`,opacity:0.3 }}>{e}</span>
-        ))}
-      </div>
+      <CinematicBG />
       <div className="relative z-10 max-w-md mx-auto px-4 py-8 pb-16">
         <div className="text-center mb-8">
           <h1 style={{ fontFamily:"'Fraunces',serif",fontSize:36,color:"#fdf3ec",lineHeight:1.1 }}>
@@ -1283,6 +1278,244 @@ function AccountCredentials({ session, onChanged, showToast }) {
         {busy ? "Saving…" : "Update credentials"}
       </button>
     </div>
+  );
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   CinematicBG — ultra-hyperrealistic Three.js background
+   Used in AuthScreen and throughout the app
+   ═════════════════════════════════════════════════════════ */
+function CinematicBG() {
+  const cvRef  = React.useRef(null);
+  const grRef  = React.useRef(null);
+
+  React.useEffect(() => {
+    const cv = cvRef.current;
+    const gr = grRef.current;
+    if (!cv) return;
+
+    // ── Texture helpers ─────────────────────────────────
+    function circleTex(r,g,b,res=128){
+      const c=document.createElement('canvas');c.width=c.height=res;
+      const ctx=c.getContext('2d'),h=res/2;
+      const grd=ctx.createRadialGradient(h,h,0,h,h,h);
+      grd.addColorStop(0,`rgba(${r},${g},${b},1)`);
+      grd.addColorStop(.38,`rgba(${r},${g},${b},.82)`);
+      grd.addColorStop(.72,`rgba(${r},${g},${b},.15)`);
+      grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.fillStyle=grd;ctx.fillRect(0,0,res,res);
+      return new THREE.CanvasTexture(c);
+    }
+    function glowSp(r,g,b,size,res=256){
+      const c=document.createElement('canvas');c.width=c.height=res;
+      const ctx=c.getContext('2d'),h=res/2;
+      const grd=ctx.createRadialGradient(h,h,0,h,h,h);
+      grd.addColorStop(0,`rgba(${r},${g},${b},.92)`);
+      grd.addColorStop(.28,`rgba(${r},${g},${b},.55)`);
+      grd.addColorStop(.62,`rgba(${r},${g},${b},.1)`);
+      grd.addColorStop(1,`rgba(${r},${g},${b},0)`);
+      ctx.fillStyle=grd;ctx.fillRect(0,0,res,res);
+      const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),blending:THREE.AdditiveBlending,depthWrite:false,transparent:true}));
+      sp.scale.setScalar(size);return sp;
+    }
+
+    // ── Renderer / scene / camera ────────────────────────
+    const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,powerPreference:'high-performance'});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2.2));
+    renderer.setSize(cv.clientWidth,cv.clientHeight);
+    const scene=new THREE.Scene();
+    const camera=new THREE.PerspectiveCamera(58,cv.clientWidth/cv.clientHeight,.1,200);
+    camera.position.z=15;
+
+    // ── Lights ──────────────────────────────────────────
+    scene.add(new THREE.AmbientLight(0xfff1e6,.5));
+    const rL=new THREE.PointLight(0xff8fa3,2.8,50);rL.position.set(-10,-5,9);scene.add(rL);
+    const gL=new THREE.PointLight(0xffd166,2.4,45);gL.position.set(11,8,6);scene.add(gL);
+    const bL=new THREE.PointLight(0x4488ff,1.4,38);bL.position.set(-5,10,-5);scene.add(bL);
+    const pL=new THREE.PointLight(0xcc44ff,1.0,30);pL.position.set(7,-8,-4);scene.add(pL);
+
+    // ── GLSL shaders ────────────────────────────────────
+    const causticMat=new THREE.ShaderMaterial({
+      uniforms:{time:{value:0}},
+      vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+      fragmentShader:'uniform float time;varying vec2 vUv;void main(){vec2 p=vUv*2.-1.;float c=(sin(p.x*14.+sin(p.y*11.+time*1.1)+time*.4)+sin(p.y*16.+sin(p.x*9.-time*.9)+time*.35)+sin((p.x+p.y)*10.+time*1.3));c=abs(c)/3.;float ca=pow(max(0.,1.-abs(c-.5)*2.2),4.5);vec3 col=mix(vec3(0.,.12,.5),vec3(.4,.85,1.),ca);col+=vec3(.3,.1,0.)*pow(ca,2.);gl_FragColor=vec4(col,ca*.42);}',
+      transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide
+    });
+    const causticPlane=new THREE.Mesh(new THREE.PlaneGeometry(38,38),causticMat);
+    causticPlane.position.z=-11;causticPlane.rotation.x=-.25;scene.add(causticPlane);
+
+    // Gem shader (hearts)
+    const gemVS='varying vec3 vN;varying vec3 vVP;void main(){vN=normalize(normalMatrix*normal);vVP=-vec3(modelViewMatrix*vec4(position,1.0));gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}';
+    const gemFS='uniform float time;varying vec3 vN;varying vec3 vVP;void main(){vec3 n=normalize(vN);vec3 v=normalize(vVP);float fr=pow(1.-max(dot(n,v),0.),2.8);vec3 col=mix(vec3(1.,.38,.52),vec3(1.,.92,.6),fr);col+=vec3(.5+.5*sin(dot(n,vec3(1.,2.,3.))*9.+time*2.5))*.28;col+=vec3(.3,.15,0.)*fr*.65;gl_FragColor=vec4(col,.92);}';
+    const gemU={time:{value:0}};
+
+    // Rainbow DNA shader
+    const dnaVS='varying vec3 vWP;void main(){vWP=(modelMatrix*vec4(position,1.0)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(vWP,1.0);}';
+    const dnaFS='uniform float time;varying vec3 vWP;void main(){float t=fract((vWP.y+10.)/20.*2.-time*.1);vec3 c;c.r=.5+.5*cos(6.28318*t);c.g=.5+.5*cos(6.28318*(t+.333));c.b=.5+.5*cos(6.28318*(t+.667));float glow=.5+.5*sin(time*3.+vWP.y*.8);c+=vec3(glow*.12);gl_FragColor=vec4(c,.72);}';
+    const dnaU={time:{value:0}};
+
+    // ── Circular particle clouds (NO squares) ────────────
+    function cloud(n,spread,r,g,b,sz,op){
+      const geo=new THREE.BufferGeometry();const pos=new Float32Array(n*3);
+      for(let i=0;i<n;i++){
+        const R=spread*Math.pow(Math.random(),.44),th=Math.random()*Math.PI*2,ph=Math.random()*Math.PI;
+        pos[i*3]=R*Math.sin(ph)*Math.cos(th);pos[i*3+1]=R*Math.sin(ph)*Math.sin(th);pos[i*3+2]=R*Math.cos(ph)-9;
+      }
+      geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+      const tex=circleTex(r,g,b);
+      return new THREE.Points(geo,new THREE.PointsMaterial({map:tex,alphaMap:tex,alphaTest:.01,color:new THREE.Color(r/255,g/255,b/255),size:sz,transparent:true,opacity:op,sizeAttenuation:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+    }
+    const stars =cloud(4200,28,255,240,222,.05,.7);
+    const nebR  =cloud(2600,20,255,143,163,.115,.62);
+    const nebG  =cloud(2000,24,255,209,102,.09,.54);
+    const nebP  =cloud(1500,15,197,139,255,.085,.46);
+    const nebT  =cloud(1100,12,124,196,255,.075,.38);
+    [stars,nebR,nebG,nebP,nebT].forEach(n=>scene.add(n));
+
+    // ── Heart geometry ───────────────────────────────────
+    const hs=new THREE.Shape();
+    hs.moveTo(.25,.25);hs.bezierCurveTo(.25,.25,.2,0,0,0);
+    hs.bezierCurveTo(-.3,0,-.3,.35,-.3,.35);hs.bezierCurveTo(-.3,.55,-.1,.77,.25,.95);
+    hs.bezierCurveTo(.6,.77,.8,.55,.8,.35);hs.bezierCurveTo(.8,.35,.8,0,.5,0);
+    hs.bezierCurveTo(.35,0,.25,.25,.25,.25);
+    const HG=new THREE.ExtrudeGeometry(hs,{depth:.3,bevelEnabled:true,bevelThickness:.07,bevelSize:.07,bevelSegments:6,curveSegments:24});
+    HG.center();
+    const ss=new THREE.Shape();
+    for(let i=0;i<10;i++){const r=i%2===0?1:.40,a=(i/10)*Math.PI*2-Math.PI/2;i===0?ss.moveTo(Math.cos(a)*r,Math.sin(a)*r):ss.lineTo(Math.cos(a)*r,Math.sin(a)*r);}
+    ss.closePath();
+    const SG=new THREE.ExtrudeGeometry(ss,{depth:.22,bevelEnabled:true,bevelThickness:.05,bevelSize:.05,bevelSegments:3});SG.center();
+
+    // ── Floating gems + orbs ─────────────────────────────
+    const PAL=[[255,93,115],[255,143,163],[255,209,102],[255,178,107],[197,139,255],[124,196,255],[123,227,177],[245,151,142]];
+    const floaters=[];
+    for(let i=0;i<28;i++){
+      const [r,g,b]=PAL[i%PAL.length];
+      const isHeart=Math.random()<.55;
+      const mat=isHeart
+        ?new THREE.ShaderMaterial({vertexShader:gemVS,fragmentShader:gemFS,uniforms:{time:{value:0}},transparent:true,side:THREE.DoubleSide})
+        :new THREE.MeshPhongMaterial({color:new THREE.Color(r/255,g/255,b/255),emissive:new THREE.Color(r/510,g/510,b/510),emissiveIntensity:.4,shininess:200,transparent:true,opacity:.93,specular:new THREE.Color(.9,.9,.9)});
+      const mesh=new THREE.Mesh(isHeart?HG:SG,mat);
+      const sc=.22+Math.random()*.88;mesh.scale.setScalar(sc);
+      const [px,py,pz]=[(Math.random()-.5)*28,(Math.random()-.5)*19,Math.random()*6-5];
+      mesh.position.set(px,py,pz);
+      const glow=glowSp(r,g,b,sc*5.2);glow.position.set(px,py,pz-.6);
+      mesh.userData={sc,vy:.003+Math.random()*.006,vx:(Math.random()-.5)*.004,wobble:Math.random()*Math.PI*2,spin:(Math.random()-.5)*.032,glow,isHeart};
+      scene.add(mesh);scene.add(glow);floaters.push(mesh);
+    }
+    const orbList=[];
+    for(let i=0;i<10;i++){
+      const [r,g,b]=PAL[i%PAL.length];const rad=.38+Math.random()*1.0;
+      const orb=new THREE.Mesh(new THREE.SphereGeometry(rad,30,30),new THREE.MeshPhongMaterial({color:new THREE.Color(r/255*.5,g/255*.5,b/255*.5),emissive:new THREE.Color(r/255*.2,g/255*.2,b/255*.2),emissiveIntensity:.6,shininess:360,transparent:true,opacity:.58,specular:new THREE.Color(1,1,1)}));
+      const atm=new THREE.Mesh(new THREE.SphereGeometry(rad*1.45,12,12),new THREE.MeshBasicMaterial({color:new THREE.Color(r/255,g/255,b/255),transparent:true,opacity:.065,side:THREE.BackSide}));
+      const gs=glowSp(r,g,b,rad*7.5);
+      const [ox,oy,oz]=[(Math.random()-.5)*24,(Math.random()-.5)*16,Math.random()*4-5];
+      orb.position.set(ox,oy,oz);atm.position.set(ox,oy,oz);gs.position.set(ox,oy,oz-.8);
+      orb.userData={vy:.002+Math.random()*.005,vx:(Math.random()-.5)*.003,wobble:Math.random()*Math.PI*2,glow:gs,atm};
+      scene.add(orb);scene.add(atm);scene.add(gs);orbList.push(orb);
+    }
+
+    // ── Rainbow DNA helix (ambient background element) ───
+    const helixGroup=new THREE.Group();
+    for(let strand=0;strand<2;strand++){
+      const pts=[];
+      for(let j=0;j<=90;j++){const t=(j/90)*Math.PI*8,off=strand?Math.PI:0;pts.push(new THREE.Vector3(Math.cos(t+off)*2.5,t*.5-10,Math.sin(t+off)*1.0));}
+      const tube=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),90,.06,10,false);
+      helixGroup.add(new THREE.Mesh(tube,new THREE.ShaderMaterial({vertexShader:dnaVS,fragmentShader:dnaFS,uniforms:dnaU,transparent:true,depthWrite:false})));
+    }
+    for(let i=0;i<16;i++){
+      const t=(i/16)*Math.PI*8;
+      const p1=new THREE.Vector3(Math.cos(t)*2.5,t*.5-10,Math.sin(t)*1.0);
+      const p2=new THREE.Vector3(Math.cos(t+Math.PI)*2.5,t*.5-10,Math.sin(t+Math.PI)*1.0);
+      helixGroup.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([p1,p2]),5,.04,6,false),
+        new THREE.MeshPhongMaterial({color:0xffd166,emissive:0xffb26b,emissiveIntensity:.5,transparent:true,opacity:.65,shininess:160})));
+    }
+    helixGroup.add(glowSp(120,200,255,22));
+    helixGroup.position.set(-5,-1,-5);helixGroup.scale.setScalar(.75);scene.add(helixGroup);
+
+    // ── Film grain ──────────────────────────────────────
+    let grainTick=0;
+    function updateGrain(){
+      if(!gr)return;
+      gr.width=gr.clientWidth||innerWidth;gr.height=gr.clientHeight||innerHeight;
+      const gCtx=gr.getContext('2d');
+      const id=gCtx.createImageData(gr.width,gr.height);const d=id.data;
+      for(let i=0;i<d.length;i+=4){const v=Math.random()*255;d[i]=d[i+1]=d[i+2]=v;d[i+3]=255;}
+      gCtx.putImageData(id,0,0);
+    }
+
+    // ── Mouse parallax ──────────────────────────────────
+    let mx=0,my=0;
+    const onMouse=e=>{mx=(e.clientX/innerWidth-.5)*2;my=-(e.clientY/innerHeight-.5)*2;};
+    window.addEventListener('mousemove',onMouse);
+
+    // ── Resize ──────────────────────────────────────────
+    const onResize=()=>{
+      camera.aspect=cv.clientWidth/cv.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(cv.clientWidth,cv.clientHeight);
+    };
+    window.addEventListener('resize',onResize);
+
+    // ── Animate ─────────────────────────────────────────
+    const clock=new THREE.Clock();let raf;
+    const animate=()=>{
+      raf=requestAnimationFrame(animate);
+      const t=clock.getElapsedTime();
+      camera.position.x+=(mx*.65-camera.position.x)*.042;
+      camera.position.y+=(my*.42-camera.position.y)*.042;
+      camera.lookAt(0,0,0);
+
+      causticMat.uniforms.time.value=t;dnaU.time.value=t;gemU.time.value=t;
+
+      floaters.forEach(f=>{
+        const u=f.userData;
+        f.position.y+=u.vy;f.position.x+=u.vx+Math.sin(t*.85+u.wobble)*.005;
+        f.rotation.z+=u.spin;f.rotation.y+=u.spin*.7;
+        f.scale.setScalar(u.sc*(1+Math.sin(t*2.2+u.wobble)*.1));
+        if(f.position.y>12)f.position.y=-12;
+        u.glow.position.x=f.position.x;u.glow.position.y=f.position.y;
+        if(f.isHeart&&f.material.uniforms)f.material.uniforms.time.value=t;
+      });
+
+      orbList.forEach(orb=>{
+        const u=orb.userData;
+        orb.position.y+=u.vy;orb.position.x+=Math.sin(t*.7+u.wobble)*.003;
+        const pulse=1+Math.sin(t*1.8+u.wobble)*.07;orb.scale.setScalar(pulse);
+        if(orb.position.y>12)orb.position.y=-12;
+        if(u.glow){u.glow.position.x=orb.position.x;u.glow.position.y=orb.position.y;}
+        if(u.atm){u.atm.position.x=orb.position.x;u.atm.position.y=orb.position.y;u.atm.scale.setScalar(pulse);}
+      });
+
+      nebR.rotation.y=t*.011;nebG.rotation.y=-t*.009;nebP.rotation.y=t*.01;nebT.rotation.z=t*.008;stars.rotation.y=t*.003;
+      helixGroup.rotation.y=t*.22;helixGroup.rotation.x=Math.sin(t*.14)*.1;
+
+      rL.intensity=2.8+Math.sin(t*1.3)*.9;gL.intensity=2.4+Math.sin(t*1.6+.8)*.85;
+      gL.position.x=Math.sin(t*.4)*12;gL.position.y=Math.cos(t*.3)*9;
+      bL.intensity=1.4+Math.sin(t*1.05+1.5)*.55;pL.intensity=1.0+Math.sin(t*.95+2.2)*.45;
+
+      grainTick++;if(grainTick%3===0)updateGrain();
+      renderer.render(scene,camera);
+    };
+    animate();
+
+    return()=>{
+      cancelAnimationFrame(raf);
+      window.removeEventListener('mousemove',onMouse);
+      window.removeEventListener('resize',onResize);
+      try{HG.dispose();SG.dispose();renderer.dispose();}catch(e){}
+    };
+  },[]);
+
+  return (
+    <>
+      <canvas ref={cvRef} style={{position:'fixed',inset:0,width:'100%',height:'100%',zIndex:0,pointerEvents:'none',display:'block'}} />
+      <canvas ref={grRef} style={{position:'fixed',inset:0,width:'100%',height:'100%',zIndex:1,pointerEvents:'none',opacity:.042,mixBlendMode:'overlay'}} />
+      {/* Cinematic color grade overlay */}
+      <div style={{position:'fixed',inset:0,zIndex:2,pointerEvents:'none',background:'linear-gradient(155deg,rgba(0,50,80,.1) 0%,transparent 45%,rgba(90,35,0,.07) 100%)',mixBlendMode:'color'}} />
+      {/* Vignette */}
+      <div style={{position:'fixed',inset:0,zIndex:2,pointerEvents:'none',background:'radial-gradient(ellipse 92% 92% at 50% 50%,transparent 52%,rgba(2,0,4,.78) 100%)'}} />
+    </>
   );
 }
 
