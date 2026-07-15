@@ -48,26 +48,47 @@ const LEVELS = [
 ];
 
 const BADGES = [
-  { id: "first", name: "First Spark", desc: "Log your first act", emoji: "✨", color: "#ffd166", shape: "star", test: (s) => s.total >= 1 },
-  { id: "five", name: "Ripple Maker", desc: "5 acts logged", emoji: "🌊", color: "#7cc4ff", shape: "medal", test: (s) => s.total >= 5 },
-  { id: "ten", name: "Wave of Good", desc: "10 acts logged", emoji: "🌟", color: "#ffd166", shape: "star", test: (s) => s.total >= 10 },
-  { id: "twentyfive", name: "Kindness Force", desc: "25 acts logged", emoji: "🚀", color: "#c58bff", shape: "medal", test: (s) => s.total >= 25 },
-  { id: "fifty", name: "Half-Century Hero", desc: "50 acts logged", emoji: "🦸", color: "#ff5d73", shape: "medal", test: (s) => s.total >= 50 },
-  { id: "hundredacts", name: "Kindness Legend", desc: "100 acts logged", emoji: "👑", color: "#ffd166", shape: "star", test: (s) => s.total >= 100 },
-  { id: "streak3", name: "On a Roll", desc: "3-day streak", emoji: "🔥", color: "#ffb26b", shape: "heart", test: (s) => s.streak >= 3 },
-  { id: "streak7", name: "Week of Warmth", desc: "7-day streak", emoji: "🏆", color: "#ffd166", shape: "medal", test: (s) => s.streak >= 7 },
-  { id: "streak14", name: "Fortnight of Good", desc: "14-day streak", emoji: "⚡", color: "#7cc4ff", shape: "star", test: (s) => s.streak >= 14 },
-  { id: "streak30", name: "30-Day Kindness Badge", desc: "30 days in a row!", emoji: "🎖️", color: "#ff5d73", shape: "medal", test: (s) => s.streak >= 30 },
-  { id: "giver", name: "Generous Heart", desc: "3 donations", emoji: "💝", color: "#ff5d73", shape: "heart", test: (s) => (s.byCat.donation || 0) >= 3 },
-  { id: "donationking", name: "Donation King", desc: "10 donations", emoji: "🤴", color: "#ffd166", shape: "medal", test: (s) => (s.byCat.donation || 0) >= 10 },
-  { id: "volunteerhero", name: "Volunteer Hero", desc: "10 community acts", emoji: "🦺", color: "#7cc4ff", shape: "medal", test: (s) => (s.byCat.community || 0) >= 10 },
-  { id: "heartwarmer", name: "Heartwarmer", desc: "10 emotional supports", emoji: "🤗", color: "#c58bff", shape: "heart", test: (s) => (s.byCat.emotional || 0) >= 10 },
-  { id: "earthangel", name: "Earth Angel", desc: "10 environment acts", emoji: "🌍", color: "#7be3b1", shape: "star", test: (s) => (s.byCat.environment || 0) >= 10 },
-  { id: "points100", name: "Century of Care", desc: "100 points", emoji: "💯", color: "#ffb26b", shape: "medal", test: (s) => s.points >= 100 },
-  { id: "points500", name: "Point Titan", desc: "500 points", emoji: "🏅", color: "#ffd166", shape: "medal", test: (s) => s.points >= 500 },
-  { id: "photographer", name: "Proof Positive", desc: "5 acts with photos", emoji: "📸", color: "#7cc4ff", shape: "star", test: (s) => (s.withPhotos || 0) >= 5 },
-  { id: "explorer", name: "Kindness Explorer", desc: "Acts in 3 places", emoji: "🧭", color: "#7be3b1", shape: "medal", test: (s) => (s.uniquePlaces || 0) >= 3 },
-  { id: "storyteller", name: "Storyteller", desc: "5 comments written", emoji: "💬", color: "#c58bff", shape: "heart", test: (s) => (s.commentCount || 0) >= 5 },
+  // ── COMMON ──────────────────────────────────────────────
+  { id:"first",    name:"First Spark",       desc:"Log your first act",        emoji:"✨", color:"#ffd166", shape:"star",  tier:"common",   test:s=>s.total>=1 },
+  { id:"five",     name:"Ripple Maker",       desc:"5 acts logged",             emoji:"🌊", color:"#7cc4ff", shape:"medal", tier:"common",   test:s=>s.total>=5 },
+  { id:"streak3",  name:"On a Roll",          desc:"3-day streak",              emoji:"🔥", color:"#ffb26b", shape:"heart", tier:"common",   test:s=>s.streak>=3 },
+  { id:"giver",    name:"Generous Heart",     desc:"3 donations",               emoji:"💝", color:"#ff5d73", shape:"heart", tier:"common",   test:s=>s.byCat.donation>=3 },
+  { id:"peace",    name:"Peacekeeper",        desc:"5 emotional support acts",  emoji:"☮️", color:"#7be3b1", shape:"star",  tier:"common",   test:s=>(s.byCat.emotional||0)>=5 },
+  { id:"nfriend",  name:"Nature Friend",      desc:"5 environment acts",        emoji:"🌿", color:"#7be3b1", shape:"medal", tier:"common",   test:s=>(s.byCat.environment||0)>=5 },
+  // ── UNCOMMON ────────────────────────────────────────────
+  { id:"ten",      name:"Wave of Good",       desc:"10 acts logged",            emoji:"🌟", color:"#ffd166", shape:"star",  tier:"uncommon", test:s=>s.total>=10 },
+  { id:"streak7",  name:"Week of Warmth",     desc:"7-day streak",              emoji:"🏆", color:"#ffd166", shape:"medal", tier:"uncommon", test:s=>s.streak>=7 },
+  { id:"points100",name:"Century of Care",    desc:"100 points",                emoji:"💯", color:"#ffb26b", shape:"medal", tier:"uncommon", test:s=>s.points>=100 },
+  { id:"photog",   name:"Proof Positive",     desc:"5 acts with photos",        emoji:"📸", color:"#7cc4ff", shape:"star",  tier:"uncommon", test:s=>(s.withPhotos||0)>=5 },
+  { id:"storytel", name:"Storyteller",        desc:"5 comments written",        emoji:"💬", color:"#c58bff", shape:"heart", tier:"uncommon", test:s=>(s.commentCount||0)>=5 },
+  { id:"helper",   name:"Helping Force",      desc:"10 helping acts",           emoji:"🤝", color:"#ffd166", shape:"star",  tier:"uncommon", test:s=>(s.byCat.helping||0)>=10 },
+  // ── RARE ────────────────────────────────────────────────
+  { id:"twentyfive",name:"Kindness Force",    desc:"25 acts logged",            emoji:"🚀", color:"#c58bff", shape:"medal", tier:"rare",     test:s=>s.total>=25 },
+  { id:"donking",  name:"Donation King",      desc:"10 donations",              emoji:"🤴", color:"#ffd166", shape:"medal", tier:"rare",     test:s=>(s.byCat.donation||0)>=10 },
+  { id:"volhero",  name:"Volunteer Hero",     desc:"10 community acts",         emoji:"🦺", color:"#7cc4ff", shape:"medal", tier:"rare",     test:s=>(s.byCat.community||0)>=10 },
+  { id:"eartha",   name:"Earth Angel",        desc:"10 environment acts",       emoji:"🌍", color:"#7be3b1", shape:"star",  tier:"rare",     test:s=>(s.byCat.environment||0)>=10 },
+  { id:"heartwarm",name:"Heartwarmer",        desc:"10 emotional supports",     emoji:"🤗", color:"#c58bff", shape:"heart", tier:"rare",     test:s=>(s.byCat.emotional||0)>=10 },
+  { id:"explore",  name:"Kindness Explorer",  desc:"Acts in 3 places",          emoji:"🧭", color:"#7be3b1", shape:"medal", tier:"rare",     test:s=>(s.uniquePlaces||0)>=3 },
+  { id:"streak14", name:"Fortnight of Good",  desc:"14-day streak",             emoji:"⚡", color:"#7cc4ff", shape:"star",  tier:"rare",     test:s=>s.streak>=14 },
+  { id:"points500",name:"Point Titan",        desc:"500 points",                emoji:"🏅", color:"#ffd166", shape:"medal", tier:"rare",     test:s=>s.points>=500 },
+  { id:"social50", name:"Social Butterfly",   desc:"50 hearts given",           emoji:"🦋", color:"#ff8fa3", shape:"heart", tier:"rare",     test:s=>(s.heartsGiven||0)>=50 },
+  { id:"journalist",name:"Photo Journalist",  desc:"10 acts with photos",       emoji:"🎬", color:"#7cc4ff", shape:"medal", tier:"rare",     test:s=>(s.withPhotos||0)>=10 },
+  // ── EPIC ────────────────────────────────────────────────
+  { id:"fifty",    name:"Half-Century Hero",  desc:"50 acts logged",            emoji:"🦸", color:"#ff5d73", shape:"medal", tier:"epic",     test:s=>s.total>=50 },
+  { id:"streak30", name:"30-Day Kindness",    desc:"30 days in a row!",         emoji:"🎖️", color:"#ff5d73", shape:"medal", tier:"epic",     test:s=>s.streak>=30 },
+  { id:"cosmexp",  name:"Cosmic Explorer",    desc:"Acts in 7 places",          emoji:"🌐", color:"#c58bff", shape:"star",  tier:"epic",     test:s=>(s.uniquePlaces||0)>=7 },
+  { id:"champgiv", name:"Champion Giver",     desc:"25 donations",              emoji:"🎗️", color:"#ff8fa3", shape:"medal", tier:"epic",     test:s=>(s.byCat.donation||0)>=25 },
+  { id:"pts1000",  name:"Wealth of Kindness", desc:"1,000 points",              emoji:"💎", color:"#7cc4ff", shape:"star",  tier:"epic",     test:s=>s.points>=1000 },
+  { id:"comchamp", name:"Community Champion", desc:"30 community acts",         emoji:"🏙️", color:"#ffd166", shape:"medal", tier:"epic",     test:s=>(s.byCat.community||0)>=30 },
+  { id:"streak60", name:"Streak Legend",      desc:"60-day streak",             emoji:"🌈", color:"#c58bff", shape:"star",  tier:"epic",     test:s=>s.streak>=60 },
+  // ── LEGENDARY ───────────────────────────────────────────
+  { id:"hundred",  name:"Kindness Legend",    desc:"100 acts logged",           emoji:"👑", color:"#ffd166", shape:"star",  tier:"legendary",test:s=>s.total>=100 },
+  { id:"pts5000",  name:"Cosmic Wealth",      desc:"5,000 points",              emoji:"⭐", color:"#ffd166", shape:"star",  tier:"legendary",test:s=>s.points>=5000 },
+  { id:"cosmdono", name:"Cosmic Giver",        desc:"50 donations",              emoji:"🌌", color:"#c58bff", shape:"medal", tier:"legendary",test:s=>(s.byCat.donation||0)>=50 },
+  // ── MYTHIC ──────────────────────────────────────────────
+  { id:"year",     name:"Year of Kindness",   desc:"365 acts logged",           emoji:"🎇", color:"#ff8fa3", shape:"star",  tier:"mythic",   test:s=>s.total>=365 },
+  { id:"dna",      name:"DNA Awakened",       desc:"Creature fully evolved",    emoji:"🐉", color:"#c58bff", shape:"medal", tier:"mythic",   test:s=>s.total>=100 },
+  { id:"omni",     name:"Omnigiver",          desc:"20+ acts in every category",emoji:"🌠", color:"#ffd166", shape:"star",  tier:"mythic",   test:s=>Object.values(s.byCat||{}).filter(v=>v>=20).length>=5 },
 ];
 
 const IDEAS = [
@@ -571,39 +592,47 @@ function LevelCard({ stats }) {
 
 function BadgeRow({ earned, onSelect }) {
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2" style={{ perspective: 600 }}>
+    <div className="flex gap-3 overflow-x-auto pb-2" style={{ perspective: 700 }}>
       {BADGES.map((b, i) => {
         const got = earned.includes(b.id);
+        const tier = TIER[b.tier] || TIER.common;
+        const spinDur = b.tier === "mythic" ? 1.8 : b.tier === "legendary" ? 2.4 : b.tier === "epic" ? 3.0 : 3.8 + (i % 3);
+        const floatDur = 2.2 + (i % 4) * 0.4;
         return (
           <button
             key={b.id}
             onClick={() => onSelect && onSelect(b)}
             className="rounded-2xl px-3 py-4 text-center flex-shrink-0"
             style={{
-              width: 118,
+              width: 122,
               background: got
-                ? "linear-gradient(160deg, rgba(255,209,102,0.16), rgba(255,93,115,0.12))"
+                ? `linear-gradient(160deg, ${hexToRgba(tier.color, 0.18)}, rgba(255,255,255,0.05))`
                 : "rgba(255,255,255,0.04)",
-              border: got ? `1px solid ${hexToRgba(b.color || "#ffd166", 0.55)}` : "1px solid rgba(255,255,255,0.08)",
-              opacity: got ? 1 : 0.5,
-              animation: got ? `rakBadgeFloat ${2.6 + (i % 4) * 0.35}s ease-in-out infinite` : "none",
+              border: got ? `1px solid ${hexToRgba(tier.color, 0.6)}` : "1px solid rgba(255,255,255,0.08)",
+              opacity: got ? 1 : 0.48,
+              animation: got ? `rakBadgeFloat ${floatDur}s ease-in-out infinite` : "none",
+              boxShadow: got ? `0 0 20px ${tier.glow}, 0 4px 16px rgba(0,0,0,0.4)` : "none",
+              transformStyle: "preserve-3d",
             }}
           >
-            <div
-              style={{
-                fontSize: 26,
-                filter: got ? "none" : "grayscale(1)",
-                display: "inline-block",
-                animation: got ? `rakSpinY ${3.2 + (i % 3)}s linear infinite` : "none",
-                transformStyle: "preserve-3d",
-              }}
-            >
+            <div style={{
+              fontSize: 28, filter: got ? "none" : "grayscale(1)", display: "inline-block",
+              animation: got ? `rakSpinY ${spinDur}s linear infinite` : "none",
+              transformStyle: "preserve-3d",
+              textShadow: got ? `0 0 16px ${tier.glow}` : "none",
+            }}>
               {b.emoji}
             </div>
-            <div className="mt-1 font-semibold" style={{ fontSize: 12, color: "#fdf3ec" }}>{b.name}</div>
-            <div style={{ fontSize: 10, color: "rgba(253,243,236,0.5)" }}>{b.desc}</div>
-            <div className="mt-1" style={{ fontSize: 9, color: got ? b.color || "#ffd166" : "rgba(253,243,236,0.35)" }}>
-              {got ? "★ earned · tap to view" : "🔒 locked · tap to view"}
+            {/* Tier label */}
+            {got && (
+              <div style={{ fontSize: 8, letterSpacing: "0.22em", textTransform: "uppercase", color: tier.color, marginTop: 3, fontWeight: 600 }}>
+                {tier.label}
+              </div>
+            )}
+            <div className="mt-1 font-semibold" style={{ fontSize: 11, color: "#fdf3ec", lineHeight: 1.3 }}>{b.name}</div>
+            <div style={{ fontSize: 9, color: "rgba(253,243,236,0.45)", lineHeight: 1.4, marginTop: 2 }}>{b.desc}</div>
+            <div style={{ fontSize: 8, marginTop: 4, color: got ? tier.color : "rgba(253,243,236,0.3)" }}>
+              {got ? "★ earned" : "🔒 locked"}
             </div>
           </button>
         );
@@ -1519,6 +1548,213 @@ function CinematicBG() {
   );
 }
 
+
+/* ── TIER COLORS ─────────────────────────────────────────── */
+const TIER = {
+  common:    { label:"Common",    color:"#aabbcc", glow:"rgba(170,187,204,.5)" },
+  uncommon:  { label:"Uncommon",  color:"#7be3b1", glow:"rgba(123,227,177,.6)" },
+  rare:      { label:"Rare",      color:"#7cc4ff", glow:"rgba(124,196,255,.65)" },
+  epic:      { label:"Epic",      color:"#c58bff", glow:"rgba(197,139,255,.7)" },
+  legendary: { label:"Legendary", color:"#ffd166", glow:"rgba(255,209,102,.8)" },
+  mythic:    { label:"Mythic",    color:"#ff8fa3", glow:"rgba(255,143,163,.85)" },
+};
+
+/* ── DNA CREATURE CANVAS ─────────────────────────────────── */
+function DNACreatureCanvas({ total }) {
+  const cvRef = React.useRef(null);
+  const level = total >= 100 ? 5 : total >= 50 ? 4 : total >= 25 ? 3 : total >= 10 ? 2 : total >= 1 ? 1 : 0;
+  const LABELS = [
+    "Log kindness to awaken your DNA creature ✨",
+    "Kindness Seed — DNA awakening 🌱",
+    "Sprouting Being — arms of compassion 🌿",
+    "Walking Light — taking form 🌟",
+    "Winged Guardian — spreading kindness 🦋",
+    "Cosmic Creature — fully evolved 🐉",
+  ];
+
+  React.useEffect(() => {
+    const cv = cvRef.current;
+    if (!cv) return;
+    const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(cv.clientWidth, cv.clientHeight);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(52, cv.clientWidth / cv.clientHeight, 0.1, 80);
+    camera.position.set(0, 0, 11);
+
+    scene.add(new THREE.AmbientLight(0xfff1e6, 0.55));
+    const pL1 = new THREE.PointLight(0xff8fa3, 2.5, 30); pL1.position.set(-4, 4, 6); scene.add(pL1);
+    const pL2 = new THREE.PointLight(0xffd166, 2.2, 25); pL2.position.set(4, -2, 5); scene.add(pL2);
+    const pL3 = new THREE.PointLight(0xc58bff, 1.6, 20); pL3.position.set(0, 6, 3); scene.add(pL3);
+
+    // Glow sprite helper
+    function gsp(r, g, b, size) {
+      const res = 128, c = document.createElement("canvas"); c.width = c.height = res;
+      const ctx = c.getContext("2d"), h = res / 2;
+      const grd = ctx.createRadialGradient(h, h, 0, h, h, h);
+      grd.addColorStop(0, `rgba(${r},${g},${b},.92)`);
+      grd.addColorStop(.45, `rgba(${r},${g},${b},.4)`);
+      grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grd; ctx.fillRect(0, 0, res, res);
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
+      sp.scale.setScalar(size); return sp;
+    }
+
+    // Rainbow DNA shader
+    const dnaU = { time: { value: 0 } };
+    const dnaVS = "varying vec3 vWP;void main(){vWP=(modelMatrix*vec4(position,1.0)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(vWP,1.0);}";
+    const dnaFS = "uniform float time;varying vec3 vWP;void main(){float t=fract((vWP.y+5.)/10.-time*.12);vec3 c;c.r=.5+.5*cos(6.28318*t);c.g=.5+.5*cos(6.28318*(t+.333));c.b=.5+.5*cos(6.28318*(t+.667));float gl=.5+.5*sin(time*3.+vWP.y*.9);c+=vec3(gl*.15);gl_FragColor=vec4(c,.92);}";
+    const dnaMat = new THREE.ShaderMaterial({ vertexShader: dnaVS, fragmentShader: dnaFS, uniforms: dnaU, transparent: true, depthWrite: false });
+
+    function makeTube(pts, r, mat) {
+      const g = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, r, 10, false);
+      return new THREE.Mesh(g, mat);
+    }
+
+    // DNA spine (always shown)
+    const SH = 7; const spA = [], spB = [];
+    for (let i = 0; i <= 70; i++) {
+      const t = (i / 70) * Math.PI * 8, y = (i / 70) * SH - SH / 2;
+      spA.push(new THREE.Vector3(Math.cos(t) * 1.3, y, Math.sin(t) * 0.55));
+      spB.push(new THREE.Vector3(Math.cos(t + Math.PI) * 1.3, y, Math.sin(t + Math.PI) * 0.55));
+    }
+    scene.add(makeTube(spA, 0.062, dnaMat));
+    scene.add(makeTube(spB, 0.062, dnaMat.clone()));
+    for (let i = 0; i < 14; i++) {
+      const t = (i / 14) * Math.PI * 8, y = (i / 14) * SH - SH / 2;
+      const p1 = new THREE.Vector3(Math.cos(t) * 1.3, y, Math.sin(t) * 0.55);
+      const p2 = new THREE.Vector3(Math.cos(t + Math.PI) * 1.3, y, Math.sin(t + Math.PI) * 0.55);
+      scene.add(makeTube([p1, p2], 0.036, new THREE.MeshPhongMaterial({ color: 0xffd166, emissive: 0xffb26b, emissiveIntensity: 0.55, transparent: true, opacity: 0.72 })));
+    }
+    // Bioluminescent nodes on DNA
+    const nodeGeo = new THREE.SphereGeometry(0.1, 10, 10);
+    const PAL2 = [[255,93,115],[255,209,102],[197,139,255],[124,196,255],[123,227,177]];
+    for (let i = 0; i < 10; i++) {
+      const t = (i / 10) * Math.PI * 8, y = (i / 10) * SH - SH / 2;
+      const [r, g, b] = PAL2[i % PAL2.length];
+      const nd = new THREE.Mesh(nodeGeo, new THREE.MeshPhongMaterial({ color: new THREE.Color(r/255,g/255,b/255), emissive: new THREE.Color(r/255,g/255,b/255), emissiveIntensity: 1.0 }));
+      nd.position.set(Math.cos(t)*1.3, y, Math.sin(t)*0.55);
+      const ng = gsp(r, g, b, 1.8); ng.position.copy(nd.position);
+      scene.add(nd); scene.add(ng);
+    }
+
+    // Body material
+    const bMat = new THREE.MeshPhongMaterial({ color: 0xffb3c6, emissive: 0xff4488, emissiveIntensity: 0.28, shininess: 180, transparent: true, opacity: 0.93, specular: new THREE.Color(1, 0.8, 0.85) });
+    const allMeshes = [];
+
+    if (level >= 1) {
+      // Glowing orb / egg emerging from DNA center
+      const egg = new THREE.Mesh(new THREE.SphereGeometry(0.55, 16, 16), new THREE.MeshPhongMaterial({ color: 0xffb3c6, emissive: 0xff6699, emissiveIntensity: 0.6, shininess: 200, transparent: true, opacity: 0.88 }));
+      egg.position.set(0, 0.5, 0); scene.add(egg); allMeshes.push(egg);
+      scene.add(gsp(255, 143, 163, 4));
+    }
+
+    if (level >= 2) {
+      // Head
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.58, 16, 16), bMat);
+      head.position.set(0, 3.8, 0); scene.add(head); allMeshes.push(head);
+      scene.add(gsp(255, 143, 163, 2.5)).position.set(0, 3.8, 0);
+      // Eyes
+      [-1, 1].forEach(s => {
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0x88ddff, emissiveIntensity: 1.0 }));
+        eye.position.set(s * 0.2, 3.9, 0.5); scene.add(eye); allMeshes.push(eye);
+      });
+      // Arms reaching outward
+      [-1, 1].forEach(side => {
+        const armPts = [new THREE.Vector3(side * 0.6, 1.8, 0), new THREE.Vector3(side * 1.8, 1.0, 0.2), new THREE.Vector3(side * 2.5, 0.2, 0.5)];
+        const arm = makeTube(armPts, 0.13, bMat); scene.add(arm); allMeshes.push(arm);
+        const hand = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 10), bMat);
+        hand.position.set(side * 2.7, 0.1, 0.6); scene.add(hand); allMeshes.push(hand);
+        scene.add(gsp(255, 178, 107, 1.8)).position.set(side * 2.7, 0.1, 0.6);
+      });
+    }
+
+    if (level >= 3) {
+      // Legs
+      [-1, 1].forEach(side => {
+        const legPts = [new THREE.Vector3(side * 0.35, -2.8, 0), new THREE.Vector3(side * 0.55, -3.8, 0.25), new THREE.Vector3(side * 0.45, -4.6, 0.6)];
+        const leg = makeTube(legPts, 0.15, bMat); scene.add(leg); allMeshes.push(leg);
+        const foot = new THREE.Mesh(new THREE.SphereGeometry(0.19, 8, 8), bMat);
+        foot.position.set(side * 0.45, -4.8, 0.7); scene.add(foot); allMeshes.push(foot);
+      });
+    }
+
+    if (level >= 4) {
+      // Wings — fan of 6 tubes per side
+      [-1, 1].forEach(side => {
+        for (let f = 0; f < 6; f++) {
+          const fr = f / 5;
+          const wingPts = [new THREE.Vector3(0, 1.5 - fr * 2.5, 0), new THREE.Vector3(side * (1.5 + fr * 2.5), 1.8 - fr * 3, 0.5 + fr * 0.4), new THREE.Vector3(side * (3.5 + fr * 1.5), 0.5 - fr * 2.2, 1.0)];
+          const wMat = new THREE.MeshPhongMaterial({ color: new THREE.Color().setHSL(fr * 0.78 + 0.85, 0.85, 0.72), transparent: true, opacity: 0.42, shininess: 90, side: THREE.DoubleSide });
+          const wing = makeTube(wingPts, 0.055, wMat); scene.add(wing); allMeshes.push(wing);
+        }
+      });
+      scene.add(gsp(197, 139, 255, 9));
+    }
+
+    if (level >= 5) {
+      // Crown of light spikes
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        const crown = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.55, 6), new THREE.MeshPhongMaterial({ color: 0xffd166, emissive: 0xffd166, emissiveIntensity: 1.4 }));
+        crown.position.set(Math.cos(a) * 0.58, 4.6, Math.sin(a) * 0.58);
+        crown.rotation.x = -Math.PI / 3.5 * Math.cos(a); crown.rotation.z = -Math.PI / 3.5 * Math.sin(a);
+        scene.add(crown); allMeshes.push(crown);
+        const cg = gsp(255, 209, 102, 1.2); cg.position.copy(crown.position); scene.add(cg);
+      }
+      // Cosmic aura particle cloud
+      const aPos = new Float32Array(280 * 3);
+      for (let i = 0; i < 280; i++) {
+        const r = 2.8 + Math.random() * 1.8, t = Math.random() * Math.PI * 2, pv = Math.random() * Math.PI;
+        aPos[i*3] = r*Math.sin(pv)*Math.cos(t); aPos[i*3+1] = (Math.random()-0.25)*10; aPos[i*3+2] = r*Math.sin(pv)*Math.sin(t);
+      }
+      const aGeo = new THREE.BufferGeometry(); aGeo.setAttribute("position", new THREE.BufferAttribute(aPos, 3));
+      const aMesh = new THREE.Points(aGeo, new THREE.PointsMaterial({ color: 0xffd166, size: 0.1, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false }));
+      scene.add(aMesh); allMeshes.push(aMesh);
+      scene.add(gsp(255, 209, 102, 14));
+    }
+
+    // Always: aura glow behind creature
+    const auraSize = [0, 3, 6, 8, 11, 15][level];
+    const [ar, ag, ab] = [[0,0,0],[255,209,102],[255,143,163],[124,196,255],[197,139,255],[255,143,163]][level];
+    if (auraSize) { const ag2 = gsp(ar, ag, ab, auraSize); ag2.position.set(0, 0.5, -0.5); scene.add(ag2); }
+
+    const clock = new THREE.Clock(); let raf;
+    const animate = () => {
+      raf = requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+      dnaU.time.value = t;
+      pL1.intensity = 2.5 + Math.sin(t * 1.3) * 0.9;
+      pL2.intensity = 2.2 + Math.sin(t * 1.6 + 0.8) * 0.8;
+      pL3.position.x = Math.sin(t * 0.65) * 4;
+      // Gentle creature sway
+      scene.rotation.y = Math.sin(t * 0.38) * 0.22;
+      scene.rotation.x = Math.sin(t * 0.25) * 0.06;
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      try { renderer.dispose(); } catch (e) {}
+    };
+  }, [level]);
+
+  return (
+    <div style={{ position: "relative", width: "100%", height: 260, marginBottom: 4 }}>
+      <canvas ref={cvRef} style={{ width: "100%", height: "100%", display: "block" }} />
+      <div style={{ position: "absolute", bottom: 8, left: 0, right: 0, textAlign: "center", fontSize: 11, color: "rgba(253,243,236,0.55)", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+        {LABELS[level]}
+      </div>
+      {level > 0 && (
+        <div style={{ position: "absolute", top: 8, right: 12, fontSize: 10, letterSpacing: "0.25em", color: "#ffd166", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", padding: "3px 10px", borderRadius: 99, border: "1px solid rgba(255,209,102,0.3)" }}>
+          LVL {level} / 5
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function RandomActsOfKindness() {
   // AUTH — must be FIRST, before every other hook
   const [session, setSession] = useState(null);     // null = not authenticated
@@ -1700,7 +1936,8 @@ export default function RandomActsOfKindness() {
     const level = LEVELS[levelIdx];
     const nextLevel = LEVELS[levelIdx + 1] || null;
     const progress = nextLevel ? Math.min(1, (points - level.min) / (nextLevel.min - level.min)) : 1;
-    return { total, points, byCat, streak, withPhotos, uniquePlaces, commentCount, level, nextLevel, progress };
+    const heartsGiven = acts.reduce((n, a) => n + (a.likedByMe ? 1 : 0), 0);
+    return { total, points, byCat, streak, withPhotos, uniquePlaces, commentCount, heartsGiven, level, nextLevel, progress };
   }, [acts]);
 
   const earned = useMemo(() => BADGES.filter((b) => b.test(stats)).map((b) => b.id), [stats]);
@@ -3636,6 +3873,13 @@ export default function RandomActsOfKindness() {
             </button>
           </div>
 
+          <CinematicBG />
+
+          {/* DNA Creature Evolution */}
+          <Card className="mb-4" style={{ padding: 0, overflow: "hidden", background: "rgba(0,0,0,0.5)", border: "1px solid rgba(197,139,255,0.3)" }}>
+            <DNACreatureCanvas total={stats.total} />
+          </Card>
+
           {/* identity card */}
           <Card className="text-center">
             <div className="flex justify-center">
@@ -3702,6 +3946,24 @@ export default function RandomActsOfKindness() {
             <StatCard value={stats.points} label="points" accent="#ffb26b" delay="1.2s" />
           </div>
           <LevelCard stats={stats} />
+
+          {/* Streak Freeze IAP */}
+          {stats.streak > 0 && !premium && (
+            <div className="rounded-2xl p-4 mb-4 flex items-center gap-4" style={{ background: "rgba(255,93,115,0.08)", border: "1px solid rgba(255,93,115,0.35)" }}>
+              <div style={{ fontSize: 28, animation: "rakFlame 1.4s ease-in-out infinite", flexShrink: 0 }}>🔥</div>
+              <div className="flex-1">
+                <div className="font-bold" style={{ fontSize: 14, color: "#ff8fa3" }}>Protect your {stats.streak}-day streak!</div>
+                <div style={{ fontSize: 11, color: "rgba(253,243,236,0.55)" }}>Streak Freeze saves a broken streak — Duolingo's #1 IAP</div>
+              </div>
+              <button
+                onClick={() => { subscribePremium("monthly"); showToast("🔥 Streak Freeze included with Kindness+"); }}
+                className="rounded-full px-4 py-2 font-bold flex-shrink-0"
+                style={{ fontSize: 12, background: "linear-gradient(135deg,#ff5d73,#ffb26b)", color: "#2a0d18", boxShadow: "0 6px 20px rgba(255,93,115,0.35)" }}
+              >
+                Protect
+              </button>
+            </div>
+          )}
 
           {/* badges */}
           <SectionTitle>Badges · {earned.length}/{BADGES.length}</SectionTitle>
@@ -3819,6 +4081,7 @@ export default function RandomActsOfKindness() {
   if (view === "chat") {
     return (
       <Shell>
+        <CinematicBG />
         <div className="max-w-md mx-auto px-4 py-6 pb-32">
           <div className="font-bold mb-3" style={{ fontFamily: "'Fraunces', serif", fontSize: 22, color: "#fdf3ec" }}>Messages</div>
 
@@ -3951,6 +4214,7 @@ export default function RandomActsOfKindness() {
   if (view === "feed") {
     return (
       <Shell>
+        <CinematicBG />
         <div className="max-w-md mx-auto px-4 py-6 pb-32">
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
