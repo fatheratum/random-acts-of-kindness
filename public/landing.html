@@ -10,14 +10,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Inter:wght@200;300;400&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{background:#030106;overflow-x:hidden;filter:contrast(1.06) saturate(1.18)}
+html,body{background:#030106;overflow-x:hidden}
 #c{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
 #grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.045;mix-blend-mode:overlay}
 #grade{position:fixed;inset:0;z-index:2;pointer-events:none;background:linear-gradient(155deg,rgba(0,50,80,.11) 0%,transparent 45%,rgba(90,35,0,.08) 100%);mix-blend-mode:color}
+#cgrade{position:fixed;inset:0;z-index:6;pointer-events:none;backdrop-filter:contrast(1.06) saturate(1.18);-webkit-backdrop-filter:contrast(1.06) saturate(1.18)}
 #vignette{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse 90% 90% at 50% 50%,transparent 55%,rgba(2,0,4,.75) 100%)}
 #flares{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
 .fl{position:absolute;border-radius:50%;pointer-events:none;mix-blend-mode:screen;transform:translate(-50%,-50%);transition:opacity .8s}
-#scroll-root{position:relative;z-index:4;height:1050vh}
+#scroll-root{position:relative;z-index:4;height:1050vh;pointer-events:none}
 /* crown */
 #crown{position:fixed;top:0;left:0;right:0;z-index:200;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;pointer-events:none;background:linear-gradient(to bottom,rgba(3,1,6,.7),transparent)}
 #rak-text{font-size:clamp(9px,1.4vw,12px);letter-spacing:.42em;text-transform:uppercase;color:rgba(253,243,236,.82);font-weight:200;font-family:'Inter',sans-serif;text-shadow:0 0 30px rgba(255,209,102,.35)}
@@ -38,7 +39,7 @@ html,body{background:#030106;overflow-x:hidden;filter:contrast(1.06) saturate(1.
 .dlbl{font-size:9px;letter-spacing:.38em;text-transform:uppercase;color:rgba(253,243,236,.42);margin-top:6px;font-family:'Inter',sans-serif}
 @keyframes shim{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 /* hero */
-#hero{position:absolute;top:0;left:0;right:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:4;text-align:center;padding:0 32px}
+#hero{position:absolute;top:0;left:0;right:0;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;text-align:center;padding:0 32px;pointer-events:none}
 #ht{font-family:'Cormorant Garamond',serif;font-size:clamp(52px,11.5vw,130px);font-weight:300;line-height:.92;letter-spacing:-.025em;color:#fdf3ec;text-shadow:0 4px 80px rgba(255,143,163,.1)}
 #ht span{display:block;font-style:italic;background:linear-gradient(120deg,#ff8fa3,#ffd166 48%,#ffb26b 72%,#ff5d73);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:300% 300%;animation:shim 6s ease-in-out infinite}
 #hs{font-size:clamp(10px,1.7vw,14px);letter-spacing:.3em;text-transform:uppercase;color:rgba(253,243,236,.4);margin-top:30px;font-weight:200;font-family:'Inter',sans-serif}
@@ -65,7 +66,7 @@ html,body{background:#030106;overflow-x:hidden;filter:contrast(1.06) saturate(1.
 <body>
 <canvas id="c"></canvas>
 <canvas id="grain"></canvas>
-<div id="grade"></div>
+<div id="grade"></div><div id="cgrade"></div>
 <div id="vignette"></div>
 <div id="flares">
   <div class="fl" id="fa" style="width:220px;height:220px;background:radial-gradient(circle,rgba(255,209,102,.16) 0%,rgba(255,209,102,.05) 40%,transparent 70%)"></div>
@@ -78,7 +79,7 @@ html,body{background:#030106;overflow-x:hidden;filter:contrast(1.06) saturate(1.
 <div id="hero">
   <div id="ht">Random Acts<br/><span>of Kindness</span></div>
   <div id="hs">Every little good thing counts</div>
-  <a class="btn" href="/login">Open the App &#8599;</a>
+  <a class="btn" href="#" onclick="window.location.href='/index.html';return false;" style="pointer-events:all">Open the App &#8599;</a>
   <div id="sh"><span>Scroll</span></div>
 </div>
 <div id="scroll-root">
@@ -89,7 +90,7 @@ html,body{background:#030106;overflow-x:hidden;filter:contrast(1.06) saturate(1.
   <div class="sec" id="s5"><div class="eye">Community</div><h2 class="hl"><em>Kindness+</em><br/>Unlocked</h2><p class="sub">Hearts. Comments. Photo proof. The full social feed live from everyone everywhere. Cash App simple.</p><div class="drow"><div><div class="dnum">$4.99</div><div class="dlbl">Per Month</div></div><div><div class="dnum">8hr</div><div class="dlbl">Max Activation</div></div></div></div>
   <div class="sec" id="s6"><div class="eye">Challenges</div><h2 class="hl">Kind 7.<br/><em>Century.</em></h2><p class="sub">Join challenges. Build a 30-day streak. Earn the legendary badge. Every day you show up the constellation expands.</p></div>
   <div class="sec" id="s7"><div class="eye">DNA of Kindness</div><h2 class="hl"><em>Woven</em><br/>in Light</h2><p class="sub">Every strand of energy connecting two people performing acts of kindness becomes a permanent bond in the network.</p></div>
-  <div class="sec" id="s8"><div class="eye">Licensed to Particle LC</div><h2 class="hl"><em>Begin</em></h2><p class="sub">The world's most beautiful kindness tracker. Built with love. One small act changes everything.</p><a class="btn" href="/login" style="pointer-events:all">Open the App &#8599;</a></div>
+  <div class="sec" id="s8"><div class="eye">Licensed to Particle LC</div><h2 class="hl"><em>Begin</em></h2><p class="sub">The world's most beautiful kindness tracker. Built with love. One small act changes everything.</p><a class="btn" href="#" onclick="window.location.href='/index.html';return false;" style="pointer-events:all">Open the App &#8599;</a></div>
 </div>
 
 <script>
@@ -462,17 +463,17 @@ window.addEventListener('scroll',function(){
     for(var i=0;i<bCount;i++){bGeo.attributes.position.array[i*3]=bGeo.attributes.position.array[i*3+1]=bGeo.attributes.position.array[i*3+2]=0;bVels[i].life=Math.random()*.9+.65;}
     bGeo.attributes.position.needsUpdate=true;
   }
-  helixGroup.visible=(pct>.28&&pct<.58);
-  hazePlane.visible=(pct>.28&&pct<.58);
-  constGroup.visible=(pct>.28&&pct<.62);
-  earthGroup.visible=(pct>.42&&pct<.72);
-  flowerGroup.visible=(pct>.38&&pct<.68);
-  figureGroup.visible=(pct>.48&&pct<.72);
-  tunnelGroup.visible=(pct>.7);
-  riverGroup.visible=(pct>.6);
-  flowerBloom=pct>.38?Math.min(1,(pct-.38)/.2):0;
-  camX=Math.sin(pct*Math.PI*2.4)*2.8;camY=Math.cos(pct*Math.PI*1.8)*1.8;camZ=20-pct*5.5;
-  nebOp=pct>.82?.25:.65;
+  helixGroup.visible=(pct>.12&&pct<.52);
+  hazePlane.visible=(pct>.12&&pct<.52);
+  constGroup.visible=(pct>.1&&pct<.58);
+  earthGroup.visible=(pct>.3&&pct<.68);
+  flowerGroup.visible=(pct>.22&&pct<.62);
+  figureGroup.visible=(pct>.35&&pct<.68);
+  tunnelGroup.visible=(pct>.6);
+  riverGroup.visible=(pct>.5);
+  flowerBloom=pct>.22?Math.min(1,(pct-.22)/.18):0;
+  camX=Math.sin(pct*Math.PI*3.0)*4.5;camY=Math.cos(pct*Math.PI*2.2)*3.0;camZ=20-pct*9.0;
+  nebOp=pct>.75?.2:.68+Math.sin(pct*Math.PI)*0.15;
 });
 
 // ── GSAP REVEALS ─────────────────────────────────────────
