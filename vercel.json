@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "routes": [
+    { "src": "^/$", "dest": "/landing.html" },
+    { "src": "^/(.*\\..*)", "dest": "/$1" },
+    { "src": "^/(.*)", "dest": "/index.html" }
+  ]
+}
